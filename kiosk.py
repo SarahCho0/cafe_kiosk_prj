@@ -535,7 +535,7 @@ SYSTEM_PROMPT = """당신은 빽다방(Baek's Coffee)의 AI 키오스크 직원 
 1. [메뉴 정보]에 제공된 RAG 데이터만 기반으로 답변하세요.
 2. 가격·영양성분은 반드시 RAG 데이터의 실제 값만 사용하세요.
 3. 없는 데이터는 "해당 정보를 찾을 수 없어요 😅" 로 안내하세요.
-4. 추가 옵션(샷 추가, 시럽 등) 상세는 "매장 직원에게 문의해 주세요" 로 안내하세요.
+4. 추가 옵션(샷 추가, 시럽, 두유 변경, 펄 추가 등)은 [메뉴 정보]의 options 또는 option_summary에 있는 값만 기준으로 안내하세요. 해당 메뉴에 옵션 정보가 없을 때만 "해당 옵션 정보는 찾을 수 없어요 😅"라고 답하세요.
 5. 주문 의향이 명확하면 자연스럽게 add_to_cart를 호출하세요.
 6. 절대 감정적으로 반응하지 마세요. 항상 정중하게 응대하세요.
 7. 응답은 간결하고 명확하게, 필요한 경우 리스트/표로 정리하세요.
@@ -660,14 +660,10 @@ def load_price_map() -> dict[str, int]:
 @st.cache_data
 def load_menu_data():
     try:
-        with open("paikdabang_menu_dom.json", encoding="utf-8") as f:
+        with open("paikdabang_menu_rev.json", encoding="utf-8") as f:
             data = json.load(f)
     except FileNotFoundError:
         return []
-    def normalize(n): return re.sub(r"\s*\(", "(", n)
-    pm = load_price_map()
-    for item in data:
-        item["price_won"] = pm.get(normalize(item.get("menu_name", "")))
     return data
 
 @st.cache_data
@@ -695,6 +691,8 @@ def build_rag_docs() -> list[dict]:
         caut  = item.get("caution_note", "")
         price = item.get("price_won")
         n     = item.get("nutrition", {}) or {}
+        opt_summary = item.get("option_summary", "")
+        opts = item.get("options", []) or []
 
         nut = (
             f"칼로리:{nv(n.get('kcal'))}kcal "
@@ -719,6 +717,7 @@ def build_rag_docs() -> list[dict]:
             f"가격:{f'{price:,}원' if price else '가격정보없음'}\n"
             f"용량:{vol if is_valid(vol) else '-'}\n"
             f"설명:{desc if is_valid(desc) else '-'}\n"
+            f"옵션:{opt_summary if is_valid(opt_summary) else ('없음' if not opts else str(opts))}\n"
             f"알레르기:{alg if is_valid(alg) else '없음'}\n"
             f"영양성분:{nut}\n"
             f"주의:{caut if is_valid(caut) else '-'}"
@@ -749,7 +748,7 @@ def build_rag_docs() -> list[dict]:
             "HOT/ICED 선택 가능(메뉴에 따라)\n"
             "디카페인 버전: 아메리카노/카페라떼/바닐라라떼 등 일부 메뉴\n"
             "빽사이즈: 대용량 버전(아메리카노/카페라떼/원조커피 등)\n"
-            "추가 샷/시럽/두유 변경 등: 매장 직원 문의\n"
+            "추가 옵션은 각 메뉴의 option_summary 또는 options 정보 기준으로 안내\n"
             "결제: 카드/현금/모바일페이\n"
             "알레르기: 우유/대두/복숭아 등 - 각 메뉴 정보 참조"
         ),
