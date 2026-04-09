@@ -1,8 +1,6 @@
 import json
 import math
-import re
 import streamlit as st
-from bs4 import BeautifulSoup
 
 st.set_page_config(
     page_title="빽다방 전체 메뉴",
@@ -34,31 +32,6 @@ def to_float(val) -> float | None:
 
 # ── 데이터 로드 ─────────────────────────────────────────
 @st.cache_data
-def load_price_map() -> dict[str, int]:
-    """price.html 파싱 → 정규화된 이름:가격 dict 반환"""
-    def normalize(name: str) -> str:
-        return re.sub(r"\s*\(", "(", name)
-
-    price_map: dict[str, int] = {}
-    try:
-        with open("price.html", encoding="utf-8") as f:
-            soup = BeautifulSoup(f, "html.parser")
-        for sec in soup.find_all("div", class_="single-menu"):
-            for item in sec.find_all("div", class_="menuitem"):
-                name_div = item.find("div", class_="itemtitle-wrapper")
-                if not name_div:
-                    continue
-                name = name_div.get_text(strip=True)
-                full_text = item.get_text(separator=" ", strip=True)
-                m = re.search(r"([\d,]+)원", full_text)
-                if m:
-                    price_map[normalize(name)] = int(m.group(1).replace(",", ""))
-    except FileNotFoundError:
-        pass
-    return price_map
-
-
-@st.cache_data
 def load_news():
     try:
         with open("paikdabang_news.json", encoding="utf-8") as f:
@@ -69,18 +42,8 @@ def load_news():
 
 @st.cache_data
 def load_menu():
-    with open("paikdabang_menu_dom.json", encoding="utf-8") as f:
-        dom_data = json.load(f)
-
-    def normalize(name: str) -> str:
-        return re.sub(r"\s*\(", "(", name)
-
-    price_map = load_price_map()
-    for item in dom_data:
-        norm = normalize(item.get("menu_name", ""))
-        item["price_won"] = price_map.get(norm)
-
-    return dom_data
+    with open("paikdabang_menu_rev.json", encoding="utf-8") as f:
+        return json.load(f)
 
 all_menu = load_menu()
 

@@ -10,7 +10,7 @@ st.set_page_config(
 # ── 데이터 로드 ─────────────────────────────────────────
 @st.cache_data
 def load_menu():
-    with open("paikdabang_menu.json", encoding="utf-8") as f:
+    with open("paikdabang_coffee_menu.json", encoding="utf-8") as f:
         return json.load(f)
 
 menu = load_menu()
