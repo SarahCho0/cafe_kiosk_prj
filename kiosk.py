@@ -7,7 +7,6 @@ import math
 import re
 import os
 import streamlit as st
-from bs4 import BeautifulSoup
 
 try:
     from sklearn.feature_extraction.text import TfidfVectorizer
@@ -635,28 +634,6 @@ def nv(val) -> str:
     return str(val)
 
 # ─────────────────────────  데이터 로딩  ──────────────────────
-@st.cache_data
-def load_price_map() -> dict[str, int]:
-    def normalize(name: str) -> str:
-        return re.sub(r"\s*\(", "(", name)
-    price_map: dict[str, int] = {}
-    try:
-        with open("price.html", encoding="utf-8") as f:
-            soup = BeautifulSoup(f, "html.parser")
-        for sec in soup.find_all("div", class_="single-menu"):
-            for item in sec.find_all("div", class_="menuitem"):
-                name_div = item.find("div", class_="itemtitle-wrapper")
-                if not name_div:
-                    continue
-                name = name_div.get_text(strip=True)
-                full_text = item.get_text(separator=" ", strip=True)
-                m = re.search(r"([\d,]+)원", full_text)
-                if m:
-                    price_map[normalize(name)] = int(m.group(1).replace(",", ""))
-    except FileNotFoundError:
-        pass
-    return price_map
-
 @st.cache_data
 def load_menu_data():
     try:
