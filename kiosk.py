@@ -537,23 +537,14 @@ SYSTEM_PROMPT = """당신은 빽다방(Baek's Coffee)의 AI 키오스크 직원 
 
 ## 응답 원칙
 1. [메뉴 정보]에 제공된 RAG 데이터만 기반으로 답변하세요.
-<<<<<<< Updated upstream
-2. 가격·영양성분은 반드시 RAG 데이터의 실제 값만 사용하세요.
-3. 없는 데이터는 "해당 정보를 찾을 수 없어요 😅" 로 안내하세요.
-4. 추가 옵션(샷 추가, 시럽, 두유 변경, 펄 추가 등)은 [메뉴 정보]의 options 또는 option_summary에 있는 값만 기준으로 안내하세요. 해당 메뉴에 옵션 정보가 없을 때만 "해당 옵션 정보는 찾을 수 없어요 😅"라고 답하세요.
-5. 주문 의향이 명확하면 자연스럽게 add_to_cart를 호출하세요.
-6. 절대 감정적으로 반응하지 마세요. 항상 정중하게 응대하세요.
-7. 응답은 간결하고 명확하게, 필요한 경우 리스트/표로 정리하세요.
-=======
 2. **가격·영양성분은 반드시 RAG 데이터의 실제 값만 사용하세요.**
 3. **가격 안내 시 필수**: 메뉴명과 정확한 가격을 항상 함께 표시하세요. (예: 아메리카노(HOT) 3,300원)
 4. 없는 데이터는 "해당 정보를 찾을 수 없어요 😅" 로 안내하세요.
-5. **매장 정보 질문** (화장실, 좌석, 주차, 영업시간 등): RAG에서 검색하여 정확한 정보 제공하세요.
-6. 추가 옵션(샷 추가, 시럽 등) 상세는 "매장 직원에게 문의해 주세요" 로 안내하세요.
+5. 추가 옵션(샷 추가, 시럽, 두유 변경, 펄 추가 등)은 [메뉴 정보]의 options 또는 option_summary에 있는 값만 기준으로 안내하세요.
+6. **매장 정보 질문** (화장실, 좌석, 주차, 영업시간 등): RAG에서 검색하여 정확한 정보 제공하세요.
 7. 주문 의향이 명확하면 자연스럽게 add_to_cart를 호출하세요.
 8. 절대 감정적으로 반응하지 마세요. 항상 정중하게 응대하세요.
 9. 응답은 간결하고 명확하게, 필요한 경우 리스트/표로 정리하세요.
->>>>>>> Stashed changes
 """
 
 # ─────────────────────────  언어별 SYSTEM PROMPT  ───────────────
@@ -899,9 +890,14 @@ def build_rag_docs() -> list[dict]:
                 opt_text = opt.get("description", "")
                 options_text += f"\n• {opt_name} (+{price:,}원): {opt_text}"
                 for item in opt.get("suboptions", []):
-                    suboption_name = item.get("name", "")
-                    suboption_desc = item.get("description", "")
-                    options_text += f"\n  - {suboption_name}: {suboption_desc}"
+                    # 1. 딕셔너리 형태일 때 {"name": "...", "description": "..."}
+                    if isinstance(item, dict):
+                        suboption_name = item.get("name", "")
+                        suboption_desc = item.get("description", "")
+                        options_text += f"\n  - {suboption_name}: {suboption_desc}"
+                    # 2. 단순 문자열 형태일 때 "바닐라"
+                    else:
+                        options_text += f"\n  - {item}"
     except FileNotFoundError:
         options_text += (
             "\n• 추가샷 (+500원): 에스프레소 한 샷 추가"
@@ -916,19 +912,7 @@ def build_rag_docs() -> list[dict]:
     options_text += "\n알레르기: 우유/대두/복숭아 등 - 각 메뉴 정보 참조"
     
     docs.append({
-<<<<<<< Updated upstream
-        "text": (
-            "빽다방 메뉴 옵션 안내\n"
-            "HOT/ICED 선택 가능(메뉴에 따라)\n"
-            "디카페인 버전: 아메리카노/카페라떼/바닐라라떼 등 일부 메뉴\n"
-            "빽사이즈: 대용량 버전(아메리카노/카페라떼/원조커피 등)\n"
-            "추가 옵션은 각 메뉴의 option_summary 또는 options 정보 기준으로 안내\n"
-            "결제: 카드/현금/모바일페이\n"
-            "알레르기: 우유/대두/복숭아 등 - 각 메뉴 정보 참조"
-        ),
-=======
         "text": options_text,
->>>>>>> Stashed changes
         "name": "옵션안내", "price": None, "category": "안내",
         "is_decaf": False, "is_best": False,
     })
@@ -957,7 +941,7 @@ def build_rag_docs() -> list[dict]:
         hours = store.get("hours", {})
         
         store_text = (
-            f"빽다방 강남역점 매장 정보\n"
+            f"빽다방 낙성점 매장 정보\n"
             f"주소: {store.get('address', '정보 없음')}\n"
             f"전화: {store.get('phone', '정보 없음')}\n"
             f"영업시간: 평일 {hours.get('weekday_start', '-')} ~ {hours.get('weekday_end', '-')}, "
@@ -1614,38 +1598,8 @@ def render_payment_flow():
 # ─────────────────────────  사이드바 렌더링  ──────────────────
 def render_sidebar():
     with st.sidebar:
-<<<<<<< Updated upstream
         st.markdown(f"## {t('settings')}")
-=======
-        st.markdown("## ⚙️ 설정")
-        
-        # ── 언어 선택 ──
-        st.markdown("### 🌍 언어 선택")
-        language_options = ["한", "영", "중", "일"]
-        language_labels = ["🇰🇷 한국어", "🇺🇸 English", "🇨🇳 中文", "🇯🇵 日本語"]
-        
-        # 현재 언어 표시
-        current_lang_idx = language_options.index(st.session_state.language)
-        selected_language = st.radio(
-            "언어를 선택하세요:",
-            options=language_options,
-            format_func=lambda x: language_labels[language_options.index(x)],
-            index=current_lang_idx,
-            horizontal=False,
-            label_visibility="collapsed"
-        )
-        
-        # 언어 변경 시 처리
-        if selected_language != st.session_state.language:
-            st.session_state.language = selected_language
-            # API 메시지의 시스템 프롬프트 업데이트
-            st.session_state.api_messages[0]["content"] = get_system_prompt(selected_language)
-            # Greeting 초기화 (새로운 언어로 인사)
-            st.session_state.greeted = False
-            st.rerun()
-        
         st.divider()
->>>>>>> Stashed changes
 
         # ── API 키 ──
         api_key_in = st.text_input(
@@ -1653,6 +1607,7 @@ def render_sidebar():
             type="password",
             value=st.session_state.get("api_key", ""),
             placeholder="sk-...",
+            key="api_key_input"  
         )
         if api_key_in:
             st.session_state.api_key = api_key_in
@@ -1662,21 +1617,20 @@ def render_sidebar():
         else:
             st.success(t("api_connected"))
 
-<<<<<<< Updated upstream
         st.caption(t("lang_support"))
         st.divider()
 
         # ── 언어 선택 ──
-        lang_map = {"ko": "🇰🇷 KO", "en": "🇺🇸 EN", "cn": "🇨🇳 CN", "jp": "🇯🇵 JP"}
+        lang_map = {"ko": "🇰🇷 한국어", "en": "🇺🇸 English", "cn": "🇨🇳 中文", "jp": "🇯🇵 日本語"}
         st.markdown("**🌐 Language**")
         lang_cols = st.columns(4)
         for i, (code, label) in enumerate(lang_map.items()):
             btn_type = "primary" if st.session_state.get("lang", "ko") == code else "secondary"
             if lang_cols[i].button(label, key=f"lang_{code}", use_container_width=True, type=btn_type):
                 st.session_state.lang = code
+                st.session_state.api_messages[0]["content"] = get_system_prompt(code) # 시스템 프롬프트 업데이트 추가
+                st.session_state.greeted = False
                 st.rerun()
-=======
->>>>>>> Stashed changes
         st.divider()
 
         # ── 장바구니 ──
