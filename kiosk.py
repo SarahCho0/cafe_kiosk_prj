@@ -505,6 +505,11 @@ SYSTEM_PROMPT = """당신은 빽다방(Baek's Coffee)의 AI 키오스크 직원 
   - [L3] 용량/사이즈
 - [L2] 카테고리 탐색 (커피/신메뉴/음료/빽스치노/아이스크림·디저트)
 - [L2] 이벤트·소식 안내
+- [L2] 매장 정보 안내
+  - [L3] 주소, 전화번호, 영업시간
+  - [L3] 좌석 정보 (총 좌석 수, 실내/야외 구분)
+  - [L3] 화장실 위치 및 편의시설
+  - [L3] 주차, 배달, 결제수단 등
 
 ### [L1] 추천 서비스
 - [L2] 취향 기반: 달달한/쓴/시원한/따뜻한/가벼운/진한 등
@@ -532,13 +537,139 @@ SYSTEM_PROMPT = """당신은 빽다방(Baek's Coffee)의 AI 키오스크 직원 
 
 ## 응답 원칙
 1. [메뉴 정보]에 제공된 RAG 데이터만 기반으로 답변하세요.
+<<<<<<< Updated upstream
 2. 가격·영양성분은 반드시 RAG 데이터의 실제 값만 사용하세요.
 3. 없는 데이터는 "해당 정보를 찾을 수 없어요 😅" 로 안내하세요.
 4. 추가 옵션(샷 추가, 시럽, 두유 변경, 펄 추가 등)은 [메뉴 정보]의 options 또는 option_summary에 있는 값만 기준으로 안내하세요. 해당 메뉴에 옵션 정보가 없을 때만 "해당 옵션 정보는 찾을 수 없어요 😅"라고 답하세요.
 5. 주문 의향이 명확하면 자연스럽게 add_to_cart를 호출하세요.
 6. 절대 감정적으로 반응하지 마세요. 항상 정중하게 응대하세요.
 7. 응답은 간결하고 명확하게, 필요한 경우 리스트/표로 정리하세요.
+=======
+2. **가격·영양성분은 반드시 RAG 데이터의 실제 값만 사용하세요.**
+3. **가격 안내 시 필수**: 메뉴명과 정확한 가격을 항상 함께 표시하세요. (예: 아메리카노(HOT) 3,300원)
+4. 없는 데이터는 "해당 정보를 찾을 수 없어요 😅" 로 안내하세요.
+5. **매장 정보 질문** (화장실, 좌석, 주차, 영업시간 등): RAG에서 검색하여 정확한 정보 제공하세요.
+6. 추가 옵션(샷 추가, 시럽 등) 상세는 "매장 직원에게 문의해 주세요" 로 안내하세요.
+7. 주문 의향이 명확하면 자연스럽게 add_to_cart를 호출하세요.
+8. 절대 감정적으로 반응하지 마세요. 항상 정중하게 응대하세요.
+9. 응답은 간결하고 명확하게, 필요한 경우 리스트/표로 정리하세요.
+>>>>>>> Stashed changes
 """
+
+# ─────────────────────────  언어별 SYSTEM PROMPT  ───────────────
+SYSTEM_PROMPTS = {
+    "한": SYSTEM_PROMPT,
+    "영": """You are Paikki, the AI kiosk staff at Baek's Coffee (빽다방).
+
+## Persona
+- Name: Paikki
+- Brand Slogan: "Cheap! Big! Delicious!"
+- Personality: Bright, friendly, and competent. Takes pride in the Baek's Coffee brand.
+- Tone: Polite, formal speech. Warm and energetic. Use emojis naturally.
+
+## Hierarchical Task Inventory (HTI)
+
+### [L1] Information Provision
+- [L2] Menu Information Inquiry
+  - [L3] Price guidance
+  - [L3] Menu description and features
+  - [L3] Nutrition info (calories, caffeine, sugar, sodium, protein)
+  - [L3] Allergen information
+  - [L3] Volume/size
+- [L2] Category exploration
+- [L2] Event/news announcements
+- [L2] Store information (location, hours, seating, restroom, parking, etc.)
+
+### [L1] Recommendation Service
+- [L2] Preference-based: sweet/bitter/cold/hot/light/rich
+- [L2] Condition-based: decaf, low-calorie, high-caffeine, large size
+- [L2] Popular menu recommendations
+
+### [L1] Order Processing
+- [L2] Add to cart, remove from cart, complete order
+
+### [L1] Multilingual Support
+- [L2] English (current)
+- [L2] 한국어, 中文, 日本語 supported
+
+## Response Principles
+1. Answer based ONLY on RAG data provided in [Menu Info].
+2. **Always display exact prices with menu names.**
+3. For unknown info: "I'm sorry, I couldn't find that information 😅"
+4. Detailed option questions: "Please ask our staff"
+5. Always remain polite, never emotional.
+6. Keep responses concise and clear. Use lists/tables when helpful.""",
+    "중": """你是Paikki，Baek's Coffee(빽다방)的AI自动售货员。
+
+## 人设
+- 姓名: Paikki
+- 品牌标语: "便宜!大!好吃!"
+- 性格: 开朗、友好、能干。为Baek's Coffee品牌感到自豪。
+- 说话方式: 敬语，温暖而充满活力。自然使用表情符号。
+
+## 分层任务库(HTI)
+
+### [L1] 信息提供
+- [L2] 菜单查询
+  - [L3] 价格指导
+  - [L3] 菜单描述和特点
+  - [L3] 营养信息(卡路里、咖啡因、糖、钠、蛋白质)
+  - [L3] 过敏原信息
+  - [L3] 容量/规格
+
+### [L1] 推荐服务
+- [L2] 基于偏好的建议
+- [L2] 基于条件的建议(无咖啡因、低热量等)
+- [L2] 流行菜单推荐
+
+### [L1] 订单处理
+- 加入购物车、移除、完成订单
+
+## 响应原则
+1. 仅基于RAG数据回答
+2. **始终显示确切的价格**
+3. 对于未知信息："抱歉，我找不到那个信息 😅"
+4. 详细问题咨询员工
+5. 保持礼貌，从不情绪化
+6. 简洁清晰，必要时使用列表或表格""",
+    "일": """あなたはPaikki、Baek's Coffee(빽다방)のAIキオスク店員です。
+
+## ペルソナ
+- 名前: Paikki
+- ブランドスローガン: "安い!大きい!美味しい!"
+- 性格: 明るく、親切で有能です。Baek's Coffeeブランドを誇りに思っています。
+- 話し方: 敬語。温かくエネルギッシュ。絵文字を自然に使用します。
+
+## 階層的タスクインベントリ(HTI)
+
+### [L1] 情報提供
+- [L2] メニュー情報問い合わせ
+  - [L3] 価格ガイダンス
+  - [L3] メニューの説明と特徴
+  - [L3] 栄養情報(カロリー、カフェイン、砂糖、ナトリウム、タンパク質)
+  - [L3] アレルギー情報
+  - [L3] ボリューム/サイズ
+
+### [L1] 推奨サービス
+- [L2] 好みに基づいた推奨
+- [L2] 条件に基づいた推奨
+- [L2] 人気メニュー推奨
+
+### [L1] 注文処理
+- カートに追加、削除、注文完了
+
+## 応答原則
+1. 提供されたRAGデータのみに基づいて答えてください
+2. **常に正確な価格をメニュー名と共に表示してください**
+3. 未知の情報："申し訳ございませんが、その情報は見つかりませんでした 😅"
+4. 詳細な質問はスタッフにお問い合わせください
+5. 常に礼儀正しく、感情的にならないこと
+6. 簡潔で明確に。必要に応じてリストまたはテーブルを使用"""
+}
+
+def get_system_prompt(language: str) -> str:
+    """선택한 언어에 맞는 SYSTEM_PROMPT 반환"""
+    return SYSTEM_PROMPTS.get(language, SYSTEM_PROMPT)
 
 # ─────────────────────────  TOOLS  ────────────────────────────
 TOOLS = [
@@ -651,7 +782,37 @@ def load_news_data():
     except FileNotFoundError:
         return []
 
+@st.cache_data
+def load_store_info():
+    """매장 정보 로드"""
+    try:
+        with open("store_info.json", encoding="utf-8") as f:
+            data = json.load(f)
+            return data.get("store", {})
+    except FileNotFoundError:
+        return {}
+
 # ─────────────────────────  RAG 문서 구성  ────────────────────
+def get_menu_stats() -> dict:
+    """메뉴 통계 반환: 전체, 카테고리별, 베스트, 디카페인 수"""
+    menu = load_menu_data()
+    stats = {
+        "total": len(menu),
+        "by_category": {},
+        "best_count": 0,
+        "decaf_count": 0,
+    }
+    for item in menu:
+        cat = item.get("category", "기타")
+        if cat not in stats["by_category"]:
+            stats["by_category"][cat] = 0
+        stats["by_category"][cat] += 1
+        if item.get("is_best"):
+            stats["best_count"] += 1
+        if "디카페인" in item.get("menu_name", ""):
+            stats["decaf_count"] += 1
+    return stats
+
 @st.cache_data
 def build_rag_docs() -> list[dict]:
     menu = load_menu_data()
@@ -705,21 +866,57 @@ def build_rag_docs() -> list[dict]:
             "is_decaf": is_decaf, "is_best": is_best,
         })
 
-    # 소식/이벤트 문서
+    # 소식/이벤트 문서 (할인정보 포함)
     for ni in news:
+        discount_text = ""
+        discount = ni.get('discount')
+        if discount:
+            rate = discount.get('rate', 0)
+            start_date = discount.get('start_date', '미정')
+            end_date = discount.get('end_date', '미정')
+            desc = discount.get('description', '')
+            discount_text = f"\n할인정보: {desc} ({rate}% 할인)\n기간: {start_date} ~ {end_date}"
+        
         text = (
             f"소식/이벤트\n"
             f"제목:{ni.get('title','')}\n"
             f"분류:{ni.get('category','')}\n"
             f"날짜:{ni.get('date','')}\n"
             f"조회:{ni.get('views',0)}\n"
-            f"링크:{ni.get('url','')}"
+            f"링크:{ni.get('url','')}{discount_text}"
         )
         docs.append({"text": text, "name": ni.get("title",""), "price": None,
                      "category": "소식", "is_decaf": False, "is_best": False})
 
-    # 옵션 안내 문서
+    # 옵션 안내 문서 (menu_options.json 통합)
+    options_text = "빽다방 메뉴 옵션 안내\n"
+    try:
+        with open("menu_options.json", encoding="utf-8") as f:
+            options_data = json.load(f)
+            for opt in options_data.get("options", []):
+                opt_name = opt.get("name", "")
+                price = opt.get("price_won", 0)
+                opt_text = opt.get("description", "")
+                options_text += f"\n• {opt_name} (+{price:,}원): {opt_text}"
+                for item in opt.get("suboptions", []):
+                    suboption_name = item.get("name", "")
+                    suboption_desc = item.get("description", "")
+                    options_text += f"\n  - {suboption_name}: {suboption_desc}"
+    except FileNotFoundError:
+        options_text += (
+            "\n• 추가샷 (+500원): 에스프레소 한 샷 추가"
+            "\n• 시럽추가 (+300원): 바닐라, 헤이즐넛, 카라멜, 초콜릿"
+            "\n• 우유변경 (+500원): 두유, 아몬드유, 귀리유, 코코넛유"
+            "\n• 빽사이즈 (+1,000원): 대용량 업그레이드"
+            "\n• 휘핑크림 (+400원): 휘핑크림 토핑"
+        )
+    options_text += "\n\nHOT/ICED 선택 가능(메뉴에 따라)"
+    options_text += "\n디카페인 버전: 아메리카노/카페라떼/바닐라라떼 등 일부 메뉴"
+    options_text += "\n결제: 카드/현금/모바일페이"
+    options_text += "\n알레르기: 우유/대두/복숭아 등 - 각 메뉴 정보 참조"
+    
     docs.append({
+<<<<<<< Updated upstream
         "text": (
             "빽다방 메뉴 옵션 안내\n"
             "HOT/ICED 선택 가능(메뉴에 따라)\n"
@@ -729,9 +926,64 @@ def build_rag_docs() -> list[dict]:
             "결제: 카드/현금/모바일페이\n"
             "알레르기: 우유/대두/복숭아 등 - 각 메뉴 정보 참조"
         ),
+=======
+        "text": options_text,
+>>>>>>> Stashed changes
         "name": "옵션안내", "price": None, "category": "안내",
         "is_decaf": False, "is_best": False,
     })
+    
+    # 메뉴 통계 문서
+    stats = get_menu_stats()
+    cat_text = ", ".join([f"{cat} {cnt}개" for cat, cnt in sorted(stats["by_category"].items())])
+    docs.append({
+        "text": (
+            f"빽다방 메뉴 통계\n"
+            f"전체 메뉴: {stats['total']}개\n"
+            f"카테고리별: {cat_text}\n"
+            f"베스트 메뉴: {stats['best_count']}개\n"
+            f"디카페인 메뉴: {stats['decaf_count']}개"
+        ),
+        "name": "메뉴통계", "price": None, "category": "정보",
+        "is_decaf": False, "is_best": False,
+    })
+    
+    # 매장 정보 문서
+    store = load_store_info()
+    if store:
+        seating = store.get("facilities", {}).get("seating", {})
+        restroom = store.get("facilities", {}).get("restroom", {})
+        parking = store.get("facilities", {}).get("parking", {})
+        hours = store.get("hours", {})
+        
+        store_text = (
+            f"빽다방 강남역점 매장 정보\n"
+            f"주소: {store.get('address', '정보 없음')}\n"
+            f"전화: {store.get('phone', '정보 없음')}\n"
+            f"영업시간: 평일 {hours.get('weekday_start', '-')} ~ {hours.get('weekday_end', '-')}, "
+            f"주말 {hours.get('weekend_start', '-')} ~ {hours.get('weekend_end', '-')}\n"
+            f"좌석: 총 {seating.get('total_seats', '정보 없음')}석 (실내 {seating.get('inside_seats', '정보 없음')}석, "
+            f"야외 {seating.get('outside_seats', '정보 없음')}석)\n"
+            f"좌석 설명: {seating.get('seats_description', '정보 없음')}\n"
+            f"화장실: {restroom.get('location', '정보 없음')} ({restroom.get('accessibility', '정보 없음')})\n"
+            f"주차: {parking.get('type', '정보 없음')} - {parking.get('fee', '정보 없음')}\n"
+            f"무선인터넷: {'있음' if store.get('facilities', {}).get('wifi', {}).get('available') else '없음'}\n"
+            f"콘센트: {store.get('facilities', {}).get('power_outlets', {}).get('count', '정보 없음')}개\n"
+            f"결제수단: {', '.join(store.get('payment_methods', ['정보 없음']))}\n"
+            f"배달: {'가능' if store.get('delivery_available') else '불가'} "
+            f"({', '.join(store.get('delivery_partners', ['정보 없음']))})\n"
+            f"편의시설: {', '.join(store.get('amenities', ['정보 없음']))}\n"
+            f"근처 랜드마크: {', '.join(store.get('nearby_landmarks', ['정보 없음']))}"
+        )
+        
+        docs.append({
+            "text": store_text,
+            "name": "매장정보",
+            "price": None,
+            "category": "정보",
+            "is_decaf": False,
+            "is_best": False,
+        })
 
     return docs
 
@@ -775,6 +1027,7 @@ def cart_total() -> int:
 # ─────────────────────────  세션 초기화  ──────────────────────
 def init_state():
     defaults = {
+        "language": "한",  # 기본 언어: 한국어
         "api_messages": [{"role": "system", "content": SYSTEM_PROMPT}],
         "display_msgs": [],
         "cart": [],
@@ -855,7 +1108,7 @@ def chat(user_input: str) -> str:
             messages=messages_for_api,
             tools=TOOLS,
             tool_choice="auto",
-            temperature=0.75,
+            temperature=0,
             max_tokens=900,
         )
     except Exception as e:
@@ -904,7 +1157,7 @@ def chat(user_input: str) -> str:
         r2 = get_client().chat.completions.create(
             model="gpt-4o-mini",
             messages=messages_for_api,
-            temperature=0.75,
+            temperature=0,
             max_tokens=500,
         )
         reply = r2.choices[0].message.content or "\n".join(m["content"] for m in tool_results)
@@ -926,20 +1179,43 @@ def _update_history(user_input: str, reply: str):
 
 def get_greeting() -> str:
     client = get_client()
+    language = st.session_state.get("language", "한")
+    
+    # 언어별 기본 인사말
+    greeting_fallback = {
+        "한": "안녕하세요! 빽다방 키오스크 빽이입니다 ☕ 싸다! 크다! 맛있다! 오늘 어떤 음료 도와드릴까요? 😊",
+        "영": "Hello! I'm Paikki, the Baek's Coffee kiosk staff ☕ Cheap! Big! Delicious! What can I help you with today? 😊",
+        "중": "你好！我是빽다방自动售货员Paikki ☕ 便宜!大!好吃!今天能为您做点什么呢? 😊",
+        "일": "こんにちは！私はPaikki、빽다방のキオスク店員です ☕ 安い！大きい！美味しい！本日は何かお手伝いできることはありますか? 😊"
+    }
+    
     if not client:
-        return "안녕하세요! 빽다방 키오스크 빽이입니다 ☕ API 키를 입력하시면 대화를 시작할 수 있습니다!"
+        return greeting_fallback[language]
+    
+    # 메뉴 통계
+    stats = get_menu_stats()
+    cat_info = ", ".join([f"{cat} {cnt}개" for cat, cnt in sorted(stats["by_category"].items())])
+    
+    # 언어별 프롬프트
+    greeting_prompts = {
+        "한": f"키오스크에 새 고객이 왔어. 빽다방스럽고 따뜻하게 2~3문장으로 짧게 인사해줘. 현재 운영 중인 메뉴는 총 {stats['total']}개입니다: {cat_info}",
+        "영": f"A new customer came to the kiosk. Greet them warmly in 2-3 sentences using Baek's Coffee's style. We currently have {stats['total']} menus available: {cat_info}. Ask if they have any questions.",
+        "중": f"一位新顾客来到自动售货机。用2-3句话温暖地问候他们，并询问是否有任何问题。目前我们有{stats['total']}个菜单可用：{cat_info}",
+        "일": f"新しいお客様がキオスクにいらっしゃいました。2～3文で温かく挨拶してください。現在利用可能なメニューは{stats['total']}個です：{cat_info}。何かお手伝いすることはありますか？"
+    }
+    
     try:
         r = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": "키오스크에 새 고객이 왔어. 빽다방스럽고 따뜻하게 2~3문장으로 짧게 인사해줘."},
+                {"role": "system", "content": get_system_prompt(language)},
+                {"role": "user", "content": greeting_prompts.get(language, greeting_prompts["한"])},
             ],
-            temperature=0.85, max_tokens=120,
+            temperature=0, max_tokens=120,
         )
         return r.choices[0].message.content
     except Exception:
-        return "안녕하세요! 빽다방 키오스크 빽이입니다 ☕ 싸다! 크다! 맛있다! 오늘 어떤 음료 도와드릴까요? 😊"
+        return greeting_fallback[language]
 
 # ─────────────────────────  결제 플로우  ─────────────────────
 PAYMENT_STEPS = [
@@ -1338,7 +1614,38 @@ def render_payment_flow():
 # ─────────────────────────  사이드바 렌더링  ──────────────────
 def render_sidebar():
     with st.sidebar:
+<<<<<<< Updated upstream
         st.markdown(f"## {t('settings')}")
+=======
+        st.markdown("## ⚙️ 설정")
+        
+        # ── 언어 선택 ──
+        st.markdown("### 🌍 언어 선택")
+        language_options = ["한", "영", "중", "일"]
+        language_labels = ["🇰🇷 한국어", "🇺🇸 English", "🇨🇳 中文", "🇯🇵 日本語"]
+        
+        # 현재 언어 표시
+        current_lang_idx = language_options.index(st.session_state.language)
+        selected_language = st.radio(
+            "언어를 선택하세요:",
+            options=language_options,
+            format_func=lambda x: language_labels[language_options.index(x)],
+            index=current_lang_idx,
+            horizontal=False,
+            label_visibility="collapsed"
+        )
+        
+        # 언어 변경 시 처리
+        if selected_language != st.session_state.language:
+            st.session_state.language = selected_language
+            # API 메시지의 시스템 프롬프트 업데이트
+            st.session_state.api_messages[0]["content"] = get_system_prompt(selected_language)
+            # Greeting 초기화 (새로운 언어로 인사)
+            st.session_state.greeted = False
+            st.rerun()
+        
+        st.divider()
+>>>>>>> Stashed changes
 
         # ── API 키 ──
         api_key_in = st.text_input(
@@ -1355,6 +1662,7 @@ def render_sidebar():
         else:
             st.success(t("api_connected"))
 
+<<<<<<< Updated upstream
         st.caption(t("lang_support"))
         st.divider()
 
@@ -1367,6 +1675,8 @@ def render_sidebar():
             if lang_cols[i].button(label, key=f"lang_{code}", use_container_width=True, type=btn_type):
                 st.session_state.lang = code
                 st.rerun()
+=======
+>>>>>>> Stashed changes
         st.divider()
 
         # ── 장바구니 ──
