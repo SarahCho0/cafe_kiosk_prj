@@ -1,3 +1,5 @@
+# add_discounts.py
+
 import json
 
 # 뉴스 파일 읽기
