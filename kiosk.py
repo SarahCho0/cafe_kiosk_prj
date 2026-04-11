@@ -428,30 +428,30 @@ hr { border-color: #E8DDD0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ─────────────────────────  STORE INFO (낙성점)  ─────────────
+# ─────────────────────────  STORE INFO (강남역점)  ─────────────
 STORE_INFO = {
-    "name_ko": "빽다방 낙성점",
-    "name_en": "Paik's Coffee Nakseong",
-    "name_cn": "白咖啡 洛星店",
-    "name_jp": "ペクコーヒー 洛星店",
-    "address": "서울 관악구 남부순환로 1919 1층",
-    "direction_ko": "낙성대역 5번출구 바로 앞에 위치하고 있습니다^^",
-    "direction_en": "Right in front of Exit 5, Nakseongdae Station",
-    "direction_cn": "位于落星台站5号出口正前方",
-    "direction_jp": "落星台駅5番出口のすぐ前",
-    "subway_ko": "2호선 낙성대역 5번 출구 34m",
-    "subway_en": "Line 2 Nakseongdae Stn. Exit 5 · 34m",
-    "subway_cn": "2号线落星台站5号出口 34m",
-    "subway_jp": "2号線落星台駅5番出口 34m",
-    "hours_ko": "22:00 라스트오더",
-    "hours_en": "Last Order 22:00",
-    "hours_cn": "最后点单 22:00",
-    "hours_jp": "ラストオーダー 22:00",
-    "phone": "02-884-5585",
-    "facilities_ko": ["단체 이용 가능", "포장", "주차"],
-    "facilities_en": ["Group Use", "Takeout", "Parking"],
-    "facilities_cn": ["团体使用", "打包", "停车"],
-    "facilities_jp": ["団体利用可", "テイクアウト", "駐車場"],
+    "name_ko": "5지는 카페 강남역점",
+    "name_en": "Ojineun Cafe Gangnam Station",
+    "name_cn": "5지는 카페 江南站店",
+    "name_jp": "5지는 카페 江南駅店",
+    "address": "서울시 강남구 강남대로 100 강남빌딩 1층",
+    "direction_ko": "강남역 3번출구 바로 앞에 위치하고 있습니다^^",
+    "direction_en": "Right in front of Exit 3, Gangnam Station",
+    "direction_cn": "位于江南站3号出口正前方",
+    "direction_jp": "江南駅3番出口のすぐ前",
+    "subway_ko": "강남역 3번 출구 도보 5분",
+    "subway_en": "Gangnam Stn. Exit 3 · 5 min walk",
+    "subway_cn": "江南站3号出口 步行5分钟",
+    "subway_jp": "江南駅3番出口 徒歩5分",
+    "hours_ko": "평일 07:00-23:00, 주말 08:00-23:00",
+    "hours_en": "Weekday 07:00-23:00, Weekend 08:00-23:00",
+    "hours_cn": "平日 07:00-23:00, 周末 08:00-23:00",
+    "hours_jp": "平日 07:00-23:00, 土日 08:00-23:00",
+    "phone": "02-6955-0123",
+    "facilities_ko": ["무선 인터넷", "콘센트", "휠체어 접근", "주차장", "단체석 예약"],
+    "facilities_en": ["WiFi", "Power Outlets", "Wheelchair Access", "Parking", "Group Seating"],
+    "facilities_cn": ["无线网络", "插座", "轮椅通行", "停车场", "团体座位"],
+    "facilities_jp": ["WiFi", "コンセント", "車いす通行", "駐車場", "団体座席"],
 }
 
 # ─────────────────────────  TRANSLATIONS  ────────────────────
@@ -769,13 +769,13 @@ SYSTEM_PROMPT = """당신은 5지는 카페(Ojineun Cafe)의 AI 키오스크 직
 - 성격: 밝고 친절하며 유능함, 빽다방 브랜드에 자부심이 있음
 - 말투: 정중한 존댓말, 따뜻하고 활기차게, 이모지 자연스럽게 사용
 
-## 매장 정보 (낙성점 기준)
-- 매장명: 5지는 카페 낙성점
-- 주소: 서울 관악구 남부순환로 1919 1층
-- 전화: 02-884-5585
-- 위치: 서울 지하철 2호선 낙성대역 5번 출구 34m (도보 1분)
-- 영업시간: 라스트 오더 22:00 (매일 운영, 연중무휴)
-- 편의시설: 단체 이용 가능, 포장 가능, 주차 가능
+## 매장 정보 (강남역점 기준)
+- 매장명: 5지는 카페 강남역점
+- 주소: 서울시 강남구 강남대로 100 강남빌딩 1층
+- 전화: 02-6955-0123
+- 위치: 강남역 3번 출구 (도보 5분)
+- 영업시간: 평일 07:00~23:00, 주말 08:00~23:00 (연중무휴)
+- 편의시설: 무선 인터넷, 콘센트 8개, 휠체어 접근 가능, 주차장 이용 가능, 단체석 예약 가능(최대 10명)
 
 ## Hierarchical Task Inventory (HTI)
 
@@ -783,7 +783,7 @@ SYSTEM_PROMPT = """당신은 5지는 카페(Ojineun Cafe)의 AI 키오스크 직
 - [L2] 메뉴 정보 조회 (가격/설명/영양성분/알레르기/용량)
 - [L2] 카테고리 탐색 (커피/신메뉴/음료/빽스치노/아이스크림·디저트)
 - [L2] 이벤트·소식 안내
-- [L2] 매장 정보 안내 (주소/전화/영업시간/좌석/화장실/주차/와이파이/결제수단)
+- [L2] 매장 정보 안내 - **모든 매장 정보(주소/전화/영업시간/좌석/화장실/주차/와이파이/콘센트/결제수단/배달/휠체어 접근성/편의시설/근처 랜드마크/특별서비스 등)는 RAG에서 반드시 검색하여 정확한 정보만 제공**
 
 ### [L1] 추천 서비스
 - [L2] 취향 기반: 달달한/쓴/시원한/따뜻한/가벼운/진한 등
@@ -844,15 +844,15 @@ SYSTEM_PROMPTS = {
 
 ## Response Principles (Critical)
 1. RAG Data First: Answer based ONLY on the provided [Menu Info] and [Store Info]. 
-2. Store Information: If a user asks about parking, restroom, WiFi, or hours, you MUST retrieve the facts from the RAG data and provide an accurate answer.
+2. Store Information: For any store-related question (address, phone, hours, seating, restroom, WiFi, parking, delivery, payment methods, accessibility, amenities, landmarks), you MUST retrieve the facts from the RAG data and provide an accurate answer.
 3. Complex Queries: If a user asks two things (e.g., recommendation + parking), you MUST answer BOTH parts clearly.
 4. Language:** Respond in English. Use exact prices (e.g., 3,300 KRW).
 
 ## Store Info (Gangnam Stn. Branch)
-- Store: Ojineun Cafe Nakseongdae
+- Store: Ojineun Cafe Gangnam Station
 - Address: 1F, Gangnam Bldg, 100 Gangnam-daero, Gangnam-gu, Seoul
-- Phone: 02-884-5585
-- Hours: Last order 22:00 daily (open year-round)
+- Phone: 02-6955-0123
+- Hours: Weekday 07:00-23:00, Weekend 08:00-23:00 (Open year-round)
 
 ## Special/Difficult Situation Handling (Very Important!)
 - **Spilled water/drink**: "I'm so sorry for the inconvenience! Let me call a staff member right away 💛" → show staff call button. Add [[STAFF_CALL]] at end.
@@ -880,10 +880,11 @@ SYSTEM_PROMPTS = {
 - 姓名: Oji  品牌标语: "超赞的味道!超赞的价格!超赞的咖啡厅!"
 - 说话方式: 敬语，温暖而充满活力。自然使用表情符号。
 
-## 门店信息 (落星店)
-- 门店: 5지는 카페 落星店  地址: 首尔冠岳区南部循环路1919, 1楼
-- 电话: 02-884-5585  地铁: 首尔2号线落星台站5号出口 34m
-- 营业时间: 最后点单 22:00 (全年无休)
+## 门店信息 (江南站店)
+- 门店: 5지는 카페 江南站店  地址: 首尔江南区江南大路100, 江南楼1楼
+- 电话: 02-6955-0123  地铁: 江南站3号出口 (步行5分钟)
+- 营业时间: 平日 07:00-23:00, 周末 08:00-23:00 (全年无休)
+- 便利设施: 无线网络，8个插座，轮椅无障碍通行，停车场可用，团体座位预约(最多10人)
 
 ## 突发/困难情况处理 (非常重要!)
 - 洒水/饮料: "非常抱歉造成不便！马上为您呼叫店员 💛" → [[STAFF_CALL]]
@@ -908,10 +909,11 @@ SYSTEM_PROMPTS = {
 - 名前: Oji  スローガン: "最高の味！最高の価格！最高のカフェ！"
 - 話し方: 敬語。温かくエネルギッシュ。絵文字を自然に使用。
 
-## 店舗情報 (落星店)
-- 店舗: 5지는 카페 落星店  住所: ソウル冠岳区南部循環路1919, 1階
-- 電話: 02-884-5585  最寄り: ソウル2号線落星台駅5番出口 34m
-- 営業時間: ラストオーダー22:00 (年中無休)
+## 店舗情報 (江南駅店)
+- 店舗: 5지는 카페 江南駅店  住所: ソウル江南区江南大路100, 江南ビル1階
+- 電話: 02-6955-0123  最寄り: 江南駅3番出口 (徒歩5分)
+- 営業時間: 平日 07:00-23:00, 土日 08:00-23:00 (年中無休)
+- 便利設備: WiFi、コンセント8個、車いすアクセス可能、駐車場利用可、団体座席予約(最大10名)
 
 ## 突発/困難な状況への対応 (非常に重要！)
 - 水・飲み物をこぼした: "ご不便をおかけして申し訳ございません！すぐにスタッフを呼びます 💛" → [[STAFF_CALL]]
@@ -1249,7 +1251,7 @@ def build_rag_docs() -> list[dict]:
         hours = store.get("hours", {})
         
         store_text = (
-            f"빽다방 낙성점 매장 정보\n"
+            f"{store.get('store_name', '5지는 카페')} 매장 정보\n"
             f"주소: {store.get('address', '정보 없음')}\n"
             f"전화: {store.get('phone', '정보 없음')}\n"
             f"영업시간: 평일 {hours.get('weekday_start', '-')} ~ {hours.get('weekday_end', '-')}, "
@@ -1257,9 +1259,12 @@ def build_rag_docs() -> list[dict]:
             f"좌석: 총 {seating.get('total_seats', '정보 없음')}석 (실내 {seating.get('inside_seats', '정보 없음')}석, "
             f"야외 {seating.get('outside_seats', '정보 없음')}석)\n"
             f"좌석 설명: {seating.get('seats_description', '정보 없음')}\n"
+            f"단체석: {seating.get('group_seating', {}).get('description', '정보 없음')} - "
+            f"{'예약 필수' if seating.get('group_seating', {}).get('reservation_required') else '예약 가능'}\n"
             f"화장실: {restroom.get('location', '정보 없음')} ({restroom.get('accessibility', '정보 없음')})\n"
             f"주차: {parking.get('type', '정보 없음')} - {parking.get('fee', '정보 없음')}\n"
-            f"무선인터넷: {'있음' if store.get('facilities', {}).get('wifi', {}).get('available') else '없음'}\n"
+            f"무선인터넷: {'있음' if store.get('facilities', {}).get('wifi', {}).get('available') else '없음'} "
+            f"(비밀번호: {store.get('facilities', {}).get('wifi', {}).get('password', '정보 없음')})\n"
             f"콘센트: {store.get('facilities', {}).get('power_outlets', {}).get('count', '정보 없음')}개\n"
             f"결제수단: {', '.join(store.get('payment_methods', ['정보 없음']))}\n"
             f"배달: {'가능' if store.get('delivery_available') else '불가'} "
