@@ -525,6 +525,10 @@ TRANSLATIONS: dict[str, dict[str, object]] = {
         "feedback_good": "👍 피드백 감사합니다!",
         "feedback_bad": "👎 의견 감사합니다. 더 나은 오지가 될게요!",
         "currently_open": "영업 중",
+        "qa_coffee": "커피", "qa_new": "신메뉴", "qa_drink": "음료", 
+        "qa_paik": "빽스치노", "qa_dessert": "디저트", "qa_news": "이벤트·소식", 
+        "qa_sale": "할인·특가", "qa_best": "베스트",
+        "staff_called_success": "✅ 직원을 호출했습니다! 잠시만 기다려 주세요.",
     },
     "en": {
         "welcome": "Ojineun Cafe Kiosk",
@@ -595,6 +599,10 @@ TRANSLATIONS: dict[str, dict[str, object]] = {
         "feedback_good": "👍 Thanks for your feedback!",
         "feedback_bad": "👎 Thanks! We'll keep improving.",
         "currently_open": "Open Now",
+        "qa_coffee": "Coffee", "qa_new": "New", "qa_drink": "Drinks", 
+        "qa_paik": "Paik'sccino", "qa_dessert": "Dessert", "qa_news": "Events", 
+        "qa_sale": "Sale", "qa_best": "Best",
+        "staff_called_success": "✅ Staff called! Please wait a moment.",
     },
     "cn": {
         "welcome": "5지는 카페 키오스크",
@@ -665,6 +673,10 @@ TRANSLATIONS: dict[str, dict[str, object]] = {
         "feedback_good": "👍 感谢您的反馈！",
         "feedback_bad": "👎 感谢！我们会不断改进。",
         "currently_open": "营业中",
+        "qa_coffee": "咖啡", "qa_new": "新菜单", "qa_drink": "饮料", 
+        "qa_paik": "冰沙", "qa_dessert": "甜点", "qa_news": "活动·新闻", 
+        "qa_sale": "特价折扣", "qa_best": "热销",
+        "staff_called_success": "✅ 已呼叫店员！请稍候。",
     },
     "jp": {
         "welcome": "Ojineun カフェ キオスク",
@@ -735,6 +747,10 @@ TRANSLATIONS: dict[str, dict[str, object]] = {
         "feedback_good": "👍 フィードバックありがとうございます！",
         "feedback_bad": "👎 ご意見ありがとうございます！",
         "currently_open": "営業中",
+        "qa_coffee": "コーヒー", "qa_new": "新メニュー", "qa_drink": "ドリンク", 
+        "qa_paik": "ペクスチーノ", "qa_dessert": "デザート", "qa_news": "イベント・ニュース", 
+        "qa_sale": "割引・特価", "qa_best": "ベスト",
+        "staff_called_success": "✅ スタッフを呼びました！少々お待ちください。",
     },
 }
 
@@ -826,11 +842,16 @@ SYSTEM_PROMPTS = {
 - Personality: Bright, friendly, and competent. Takes pride in the Baek's Coffee brand.
 - Tone: Polite, formal speech. Warm and energetic. Use emojis naturally.
 
-## Store Info (Nakseong Branch)
+## Response Principles (Critical)
+1. RAG Data First: Answer based ONLY on the provided [Menu Info] and [Store Info]. 
+2. Store Information: If a user asks about parking, restroom, WiFi, or hours, you MUST retrieve the facts from the RAG data and provide an accurate answer.
+3. Complex Queries: If a user asks two things (e.g., recommendation + parking), you MUST answer BOTH parts clearly.
+4. Language:** Respond in English. Use exact prices (e.g., 3,300 KRW).
+
+## Store Info (Gangnam Stn. Branch)
 - Store: Ojineun Cafe Nakseongdae
-- Address: 1919 Nambusunhwan-ro, Gwanak-gu, Seoul, 1st Floor
+- Address: 1F, Gangnam Bldg, 100 Gangnam-daero, Gangnam-gu, Seoul
 - Phone: 02-884-5585
-- Near: Seoul Metro Line 2, Nakseongdae Station Exit 5 (34m walk)
 - Hours: Last order 22:00 daily (open year-round)
 
 ## Special/Difficult Situation Handling (Very Important!)
@@ -997,14 +1018,22 @@ ADVERSARIAL_SCENARIOS = [
 
 # ─────────────────────────  퀵 액션 메뉴 카테고리  ────────────
 QUICK_ACTIONS = [
-    ("☕",  "커피",       "커피"),
-    ("🆕",  "신메뉴",     "신메뉴"),
-    ("🍵",  "음료",       "음료"),
-    ("🧋",  "빽스치노",   "빽스치노"),
-    ("🍦",  "디저트",     "아이스크림/디저트"),
-    ("📢",  "이벤트·소식","소식"),
-    ("💰",  "할인·특가",  "할인"),
-    ("🏆",  "베스트",     "베스트"),
+    # ("☕",  "커피",       "커피"),
+    # ("🆕",  "신메뉴",     "신메뉴"),
+    # ("🍵",  "음료",       "음료"),
+    # ("🧋",  "빽스치노",   "빽스치노"),
+    # ("🍦",  "디저트",     "아이스크림/디저트"),
+    # ("📢",  "이벤트·소식","소식"),
+    # ("💰",  "할인·특가",  "할인"),
+    # ("🏆",  "베스트",     "베스트"),
+    ("☕", "qa_coffee", "커피"),
+    ("🆕", "qa_new", "신메뉴"),
+    ("🍵", "qa_drink", "음료"),
+    ("🧋", "qa_paik", "빽스치노"),
+    ("🍦", "qa_dessert", "아이스크림/디저트"),
+    ("📢", "qa_news", "소식"),
+    ("💰", "qa_sale", "할인"),
+    ("🏆", "qa_best", "베스트"),
 ]
 
 QUICK_PANEL_LABELS = {
@@ -2474,13 +2503,22 @@ def main():
 
     # ── 퀵 액션 버튼 행 (채팅 위에 고정) ──
     qa_cols = st.columns(len(QUICK_ACTIONS))
-    for i, (icon, label, key) in enumerate(QUICK_ACTIONS):
+    for i, (icon, label_key, key) in enumerate(QUICK_ACTIONS):
         active = st.session_state.quick_panel == key
         btn_type = "primary" if active else "secondary"
-        if qa_cols[i].button(f"{icon} {label}", key=f"qa_{key}",
+        # t(label_key)를 사용해서 다국어 적용!
+        if qa_cols[i].button(f"{icon} {t(label_key)}", key=f"qa_{key}",
                              use_container_width=True, type=btn_type):
             st.session_state.quick_panel = None if active else key
-            # st.rerun() 불필요: st.button() 클릭이 이미 자동으로 rerun 트리거
+    
+    # qa_cols = st.columns(len(QUICK_ACTIONS))
+    # for i, (icon, label, key) in enumerate(QUICK_ACTIONS):
+    #     active = st.session_state.quick_panel == key
+    #     btn_type = "primary" if active else "secondary"
+    #     if qa_cols[i].button(f"{icon} {label}", key=f"qa_{key}",
+    #                          use_container_width=True, type=btn_type):
+    #         st.session_state.quick_panel = None if active else key
+    #         # st.rerun() 불필요: st.button() 클릭이 이미 자동으로 rerun 트리거
 
     # ── 퀵 패널 (버튼 바로 아래, 채팅보다 위) ──
     if st.session_state.quick_panel:
