@@ -1,0 +1,81 @@
+{
+  "options": [
+    {
+      "option_id": "OPT_SHOT",
+      "name": "추가 샷",
+      "name_en": "Extra Shot",
+      "description": "에스프레소 샷 1개 추가",
+      "price_won": 500,
+      "applicable_categories": ["커피", "빽스치노"],
+      "availability": true
+    },
+    {
+      "option_id": "OPT_SYRUP",
+      "name": "시럽 추가",
+      "name_en": "Syrup Addition",
+      "description": "바닐라, 헤이즐넛, 카라멜 시럽 중 선택",
+      "price_won": 300,
+      "applicable_categories": ["커피", "음료", "빽스치노"],
+      "availability": true,
+      "suboptions": ["바닐라", "헤이즐넛", "카라멜", "초콜릿"]
+    },
+    {
+      "option_id": "OPT_MILK",
+      "name": "우유 변경",
+      "name_en": "Milk Alternative",
+      "description": "일반 우유 → 두유, 아몬드유, 귀리유 등",
+      "price_won": 500,
+      "applicable_categories": ["커피", "음료", "빽스치노"],
+      "availability": true,
+      "suboptions": ["두유", "아몬드유", "귀리유", "코코넛유"]
+    },
+    {
+      "option_id": "OPT_SIZE",
+      "name": "빽사이즈 (대용량)",
+      "name_en": "Baek Size (Large)",
+      "description": "일반(355ml) → 빽사이즈(500ml 이상)",
+      "price_won": 1000,
+      "applicable_categories": ["커피", "음료", "빽스치노"],
+      "availability": true
+    },
+    {
+      "option_id": "OPT_WHIP",
+      "name": "휘핑크림 추가",
+      "name_en": "Whipped Cream",
+      "description": "차가운 음료 위에 휘핑크림 추가",
+      "price_won": 400,
+      "applicable_categories": ["음료", "빽스치노", "아이스크림/디저트"],
+      "availability": true
+    }
+  ],
+  "option_groups": {
+    "coffee": {
+      "name": "커피 커스터마이징",
+      "options": ["OPT_SHOT", "OPT_SYRUP", "OPT_MILK", "OPT_SIZE"]
+    },
+    "drink": {
+      "name": "음료 커스터마이징",
+      "options": ["OPT_SYRUP", "OPT_MILK", "OPT_SIZE", "OPT_WHIP"]
+    },
+    "size": {
+      "name": "사이즈 업그레이드",
+      "options": ["OPT_SIZE"]
+    }
+  },
+  "popular_combinations": [
+    {
+      "name": "아메리카노 풀커스텀",
+      "description": "추가샷 + 빽사이즈",
+      "base_menu": "아메리카노",
+      "options": ["OPT_SHOT", "OPT_SIZE"],
+      "total_extra_price": 1500
+    },
+    {
+      "name": "카페라떼 프리미엄",
+      "description": "시럽 + 두유 + 빽사이즈",
+      "base_menu": "카페라떼",
+      "options": ["OPT_SYRUP", "OPT_MILK", "OPT_SIZE"],
+      "total_extra_price": 1800
+    }
+  ]
+}
