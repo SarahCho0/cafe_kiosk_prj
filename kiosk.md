@@ -1,4 +1,4 @@
-# 빽다방 AI 키오스크 (kiosk.py) 기능 명세서
+# 5지는 카페 AI 키오스크 (kiosk.py) 기능 명세서
 
 ---
 
@@ -156,12 +156,13 @@
 ### 2-8. AI 응답 시스템 세부 동작
 
 ```
-사용자 입력
-  → 욕설/돌발 키워드 감지
-  → RAG 검색 (TF-IDF cosine similarity, top-6 문서)
-  → GPT-4o-mini 1차 호출 (with tools: add_to_cart / remove_from_cart / complete_order)
+사용자 입력 (한/영/중/일)
+  → [1] translate_to_ko()  - 한국어로 번역 (RAG 정확도 향상)
+  → [2] 욕설/돌발 키워드 감지 (한국어 기준)
+  → [3] RAG 검색 — TF-IDF cosine similarity, top-6 문서 (한국어 쿼리)
+  → [4] GPT-4o-mini 1차 호출 — 한국어로 답변 (tools: add_to_cart / remove_from_cart / complete_order)
   → tool_calls 있으면 실행 후 2차 호출 (자연어 응답 생성)
-  → tool_calls 없으면 바로 응답 반환
+  → [5] translate_to_target() - 사용자 언어로 번역 후 출력
   → [[STAFF_CALL]] 마커 감지 시 직원 호출 버튼 표시
 ```
 
@@ -171,7 +172,7 @@
 
 | 키 | 설명 |
 |---|---|
-| `cart` | 장바구니 [{name, price, qty}] |
+| `cart` | 장바구니 `[{name, price, qty, options: [{name, price, qty}]}]` |
 | `display_msgs` | 화면 표시용 채팅 메시지 |
 | `api_messages` | OpenAI API에 전달되는 히스토리 |
 | `lang` | 현재 언어 (ko/en/cn/jp) |

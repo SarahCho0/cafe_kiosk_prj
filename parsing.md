@@ -56,7 +56,10 @@ HTML 소스 파일
 
 ## 3. 파싱된 데이터 파일 및 필드
 
-### 3-1. `paikdabang_menu_dom.json` — 메인 메뉴 정보 (332개)
+### 3-1. `paikdabang_menu_rev.json` — 메뉴 데이터 (332개)
+
+> `paikdabang_menu_dom.json`은 `parse_paikdabang_coffee.py`의 원본 파싱 출력물이며, `parse_price_and_news.py` 실행 후 가격이 추가된 `paikdabang_menu_rev.json`이 앱에서 사용되는 최종 파일입니다.
+
 | 필드 | 설명 | 예시 |
 |---|---|---|
 | `brand` | 브랜드명 | `"빽다방"` |
@@ -102,7 +105,7 @@ HTML 소스 파일
 ### 3-4. `store_info.json` — 매장 정보
 | 필드 | 내용 |
 |---|---|
-| 매장명 | 5지는 카페 |
+| 매장명 | 5지는 카페 강남역점 |
 | 주소 | 서울시 강남구 강남대로 100 |
 | 전화 | 02-6955-0123 |
 | 영업시간 | 평일 07:00~23:00, 주말 08:00~23:00 |
@@ -149,14 +152,31 @@ TfidfVectorizer(
 ```
 [시스템 프롬프트: 페르소나/언어/규칙 정의]
   +
-[Menu Info]: retrieve(query) 결과 (RAG 검색 문서)
+[Menu Info]: retrieve(query_ko) 결과 (RAG 검색 문서)
   +
 [대화 히스토리]
   +
-[사용자 메시지]
+[사용자 메시지 — 한국어 변환본]
 ```
 - 가격·영양성분은 RAG 데이터 값만 사용, 임의 생성 금지
 - 정보 없을 시: `"해당 정보를 찾을 수 없어요 😅"` 반환
+
+### 4-5. 다국어 번역 파이프라인
+외국어 사용자도 RAG 검색 정확도를 유지할 수 있도록 2단계 번역 레이어를 적용합니다.
+
+```
+사용자 입력 (한/영/중/일)
+  → translate_to_ko()    # 한국어로 변환 (RAG 검색·욕설 감지 기준)
+  → retrieve(query_ko)   # 한국어 쿼리로 TF-IDF 검색
+  → GPT 답변 생성 (내부는 항상 한국어)
+  → translate_to_target() # 사용자 언어로 번역 후 출력
+```
+
+| 함수 | 방향 | 비고 |
+|---|---|---|
+| `translate_to_ko(text, lang)` | 입력 → 한국어 | `lang == "ko"` 이면 패스 |
+| `translate_to_target(text, lang)` | 한국어 → 사용자 언어 | emoji·`[[STAFF_CALL]]` 태그 보존 |
+- LLM `api_messages` 히스토리는 한국어로만 저장
 
 ---
 
