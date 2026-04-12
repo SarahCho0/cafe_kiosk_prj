@@ -32,18 +32,62 @@ print(f"[가격] 추출된 메뉴 수: {len(price_data)}개")
 for n, v in price_data.items():
     print(f"  {repr(n)}: {v['price_won']}원")
 
-# ── 2) 정확히 일치하는 이름에만 가격 추가 ─────────────────────
-with open("paikdabang_coffee_menu.json", encoding="utf-8") as f:
-    coffee = json.load(f)
+# ── 2) paikdabang_menu_dom.json에 가격 추가 ─────────────────────
+def normalize(name: str) -> str:
+    return re.sub(r"\s*\(", "(", name)
 
-matched = 0
-for menu in coffee:
-    if menu["name"] in price_data:
-        menu["price_won"] = price_data[menu["name"]]["price_won"]
-        matched += 1
+try:
+    with open("paikdabang_menu_dom.json", encoding="utf-8") as f:
+        all_menu = json.load(f)
+    
+    matched_dom = 0
+    unmatched = []
+    
+    for menu in all_menu:
+        menu_name = menu.get("menu_name", "")
+        norm_name = normalize(menu_name)
+        
+        # 정확히 일치하는 이름 찾기
+        found_price = None
+        for p_name, p_data in price_data.items():
+            if normalize(p_name) == norm_name:
+                found_price = p_data["price_won"]
+                matched_dom += 1
+                break
+        
+        if found_price:
+            menu["price_won"] = found_price
+        else:
+            if menu.get("price_won") is None:
+                unmatched.append(menu_name)
+    
+    print(f"\n[DOM 매칭] {matched_dom}개 / {len(all_menu)}개")
+    if unmatched:
+        print(f"[가격 미정] {len(unmatched)}개 메뉴:")
+        for um in unmatched[:10]:  # 처음 10개만 표시
+            print(f"  - {um}")
+    
+    with open("paikdabang_menu_dom.json", "w", encoding="utf-8") as f:
+        json.dump(all_menu, f, ensure_ascii=False, indent=2)
+    print("저장 완료 → paikdabang_menu_dom.json")
+except FileNotFoundError:
+    print("[경고] paikdabang_menu_dom.json 파일 없음")
 
-print(f"\n[매칭] 정확히 일치: {matched}개 / {len(coffee)}개")
+# ── 3) paikdabang_coffee_menu.json에 가격 추가 (기존 코드 유지) ─────
+try:
+    with open("paikdabang_coffee_menu.json", encoding="utf-8") as f:
+        coffee = json.load(f)
 
-with open("paikdabang_coffee_menu.json", "w", encoding="utf-8") as f:
-    json.dump(coffee, f, ensure_ascii=False, indent=2)
-print("저장 완료 → paikdabang_coffee_menu.json")
+    matched_coffee = 0
+    for menu in coffee:
+        if menu["name"] in price_data:
+            menu["price_won"] = price_data[menu["name"]]["price_won"]
+            matched_coffee += 1
+
+    print(f"\n[Coffee 매칭] 정확히 일치: {matched_coffee}개 / {len(coffee)}개")
+
+    with open("paikdabang_coffee_menu.json", "w", encoding="utf-8") as f:
+        json.dump(coffee, f, ensure_ascii=False, indent=2)
+    print("저장 완료 → paikdabang_coffee_menu.json")
+except FileNotFoundError:
+    print("[경고] paikdabang_coffee_menu.json 파일 없음")

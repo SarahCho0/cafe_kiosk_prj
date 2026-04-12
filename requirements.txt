@@ -1,0 +1,17 @@
+# 5지는 카페 키오스크 의존성
+# pip install -r requirements.txt
+
+# Streamlit UI
+streamlit>=1.51.0
+
+# AI / LLM
+openai>=2.30.0
+
+# RAG 검색 (없어도 키워드 폴백으로 동작)
+scikit-learn>=1.8.0
+
+# HTML 파싱 (parse_paikdabang_coffee.py, parse_price_and_news.py)
+beautifulsoup4>=4.13.5
+
+# 사이트 크롤링 (parse_paikdabang_coffee.py, 선택사항)
+requests>=2.32.5

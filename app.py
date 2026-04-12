@@ -1,3 +1,5 @@
+# app.py
+
 import json
 import streamlit as st
 
@@ -10,7 +12,7 @@ st.set_page_config(
 # ── 데이터 로드 ─────────────────────────────────────────
 @st.cache_data
 def load_menu():
-    with open("paikdabang_menu.json", encoding="utf-8") as f:
+    with open("paikdabang_coffee_menu.json", encoding="utf-8") as f:
         return json.load(f)
 
 menu = load_menu()
@@ -45,13 +47,10 @@ filtered = menu[:]
 
 if temp_filter == "HOT":
     filtered = [m for m in filtered if "(HOT)" in m["name"] or
-                ("(ICED)" not in m["name"] and "(HOT)" not in m["name"] and
+                ("(HOT)" not in m["name"] and "(ICED)" not in m["name"] and 
                  "스무디" not in m["name"] and "쉐이크" not in m["name"])]
-    # 더 명확하게: HOT 포함 or 둘 다 없는 경우
-    filtered = [m for m in menu if "(HOT)" in m["name"] or
-                ("(HOT)" not in m["name"] and "(ICED)" not in m["name"])]
 elif temp_filter == "ICED":
-    filtered = [m for m in menu if "(ICED)" in m["name"] or
+    filtered = [m for m in filtered if "(ICED)" in m["name"] or
                 ("(HOT)" not in m["name"] and "(ICED)" not in m["name"])]
 else:
     filtered = menu[:]

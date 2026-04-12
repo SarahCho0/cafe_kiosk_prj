@@ -5,7 +5,8 @@
     "title": "[빽다방X크런키] ‘크런키 음료 먹고 달콤한 선물을 잡아라!’ 이벤트 결과 발표",
     "date": "2026-04-07",
     "views": 88,
-    "url": "https://paikdabang.com/post_news/crunky_event2/"
+    "url": "https://paikdabang.com/post_news/crunky_event2/",
+    "discount": null
   },
   {
     "id": 84,
@@ -13,7 +14,13 @@
     "title": "건강하게 즐기는 헬시간식 신메뉴 출시",
     "date": "2026-03-26",
     "views": 481,
-    "url": "https://paikdabang.com/post_news/%ea%b1%b4%ea%b0%95%ed%95%98%ea%b2%8c-%ec%a6%90%ea%b8%b0%eb%8a%94-%ed%97%ac%ec%8b%9c%ea%b0%84%ec%8b%9d-%ec%8b%a0%eb%a9%94%eb%89%b4-%ec%b6%9c%ec%8b%9c/"
+    "url": "https://paikdabang.com/post_news/%ea%b1%b4%ea%b0%95%ed%95%98%ea%b2%8c-%ec%a6%90%ea%b8%b0%eb%8a%94-%ed%97%ac%ec%8b%9c%ea%b0%84%ec%8b%9d-%ec%8b%a0%eb%a9%94%eb%89%b4-%ec%b6%9c%ec%8b%9c/",
+    "discount": {
+      "rate": 10,
+      "start_date": "2026-03-26",
+      "end_date": "2026-04-30",
+      "description": "건강음식 신메뉴 10% 할인"
+    }
   },
   {
     "id": 83,
@@ -21,7 +28,13 @@
     "title": "당류부담 Zero! 제로슈거 신메뉴 출시",
     "date": "2026-03-26",
     "views": 554,
-    "url": "https://paikdabang.com/post_news/%eb%8b%b9%eb%a5%98%eb%b6%80%eb%8b%b4-zero-%ec%a0%9c%eb%a1%9c%ec%8a%88%ea%b1%b0-%ec%8b%a0%eb%a9%94%eb%89%b4-%ec%b6%9c%ec%8b%9c/"
+    "url": "https://paikdabang.com/post_news/%eb%8b%b9%eb%a5%98%eb%b6%80%eb%8b%b4-zero-%ec%a0%9c%eb%a1%9c%ec%8a%88%ea%b1%b0-%ec%8b%a0%eb%a9%94%eb%89%b4-%ec%b6%9c%ec%8b%9c/",
+    "discount": {
+      "rate": 15,
+      "start_date": "2026-03-26",
+      "end_date": "2026-05-31",
+      "description": "제로슈거 신메뉴 15% 할인"
+    }
   },
   {
     "id": 82,
@@ -29,7 +42,13 @@
     "title": "한층 더 부드러운 ‘에어폼 아메리카노’ 신메뉴 출시",
     "date": "2026-03-19",
     "views": 427,
-    "url": "https://paikdabang.com/post_news/%ed%95%9c%ec%b8%b5-%eb%8d%94-%eb%b6%80%eb%93%9c%eb%9f%ac%ec%9a%b4-%ec%97%90%ec%96%b4%ed%8f%bc-%ec%95%84%eb%a9%94%eb%a6%ac%ec%b9%b4%eb%85%b8-%ec%8b%a0%eb%a9%94%eb%89%b4-%ec%b6%9c%ec%8b%9c/"
+    "url": "https://paikdabang.com/post_news/%ed%95%9c%ec%b8%b5-%eb%8d%94-%eb%b6%80%eb%93%9c%eb%9f%ac%ec%9a%b4-%ec%97%90%ec%96%b4%ed%8f%bc-%ec%95%84%eb%a9%94%eb%a6%ac%ec%b9%b4%eb%85%b8-%ec%8b%a0%eb%a9%94%eb%89%b4-%ec%b6%9c%ec%8b%9c/",
+    "discount": {
+      "rate": 20,
+      "start_date": "2026-03-19",
+      "end_date": "2026-04-30",
+      "description": "에어폼 신메뉴 20% 할인"
+    }
   },
   {
     "id": 81,
@@ -37,7 +56,8 @@
     "title": "빽다방 x 월드 바리스타 챔피언 ‘엄보람’ 협업",
     "date": "2026-03-03",
     "views": 523,
-    "url": "https://paikdabang.com/post_news/%eb%b9%bd%eb%8b%a4%eb%b0%a9-x-%ec%9b%94%eb%93%9c-%eb%b0%94%eb%a6%ac%ec%8a%a4%ed%83%80-%ec%b1%94%ed%94%bc%ec%96%b8-%ec%97%84%eb%b3%b4%eb%9e%8c-%ed%98%91%ec%97%85/"
+    "url": "https://paikdabang.com/post_news/%eb%b9%bd%eb%8b%a4%eb%b0%a9-x-%ec%9b%94%eb%93%9c-%eb%b0%94%eb%a6%ac%ec%8a%a4%ed%83%80-%ec%b1%94%ed%94%bc%ec%96%b8-%ec%97%84%eb%b3%b4%eb%9e%8c-%ed%98%91%ec%97%85/",
+    "discount": null
   },
   {
     "id": 80,
@@ -45,7 +65,13 @@
     "title": "Mango&Peach 별빛 망고피치 신메뉴 3종",
     "date": "2026-02-26",
     "views": 712,
-    "url": "https://paikdabang.com/post_news/mangopeach-%eb%b3%84%eb%b9%9b-%eb%a7%9d%ea%b3%a0%ed%94%bc%ec%b9%98-%ec%8b%a0%eb%a9%94%eb%89%b4-3%ec%a2%85/"
+    "url": "https://paikdabang.com/post_news/mangopeach-%eb%b3%84%eb%b9%9b-%eb%a7%9d%ea%b3%a0%ed%94%bc%ec%b9%98-%ec%8b%a0%eb%a9%94%eb%89%b4-3%ec%a2%85/",
+    "discount": {
+      "rate": 12,
+      "start_date": "2026-02-26",
+      "end_date": "2026-04-30",
+      "description": "망고피치 신메뉴 12% 할인"
+    }
   },
   {
     "id": 79,
@@ -53,7 +79,13 @@
     "title": "빽다방X크런키 콜라보 신메뉴 3종 출시",
     "date": "2026-02-05",
     "views": 2544,
-    "url": "https://paikdabang.com/post_news/%eb%b9%bd%eb%8b%a4%eb%b0%a9x%ed%81%ac%eb%9f%b0%ed%82%a4-%ec%bd%9c%eb%9d%bc%eb%b3%b4-%ec%8b%a0%eb%a9%94%eb%89%b4-3%ec%a2%85-%ec%b6%9c%ec%8b%9c/"
+    "url": "https://paikdabang.com/post_news/%eb%b9%bd%eb%8b%a4%eb%b0%a9x%ed%81%ac%eb%9f%b0%ed%82%a4-%ec%bd%9c%eb%9d%bc%eb%b3%b4-%ec%8b%a0%eb%a9%94%eb%89%b4-3%ec%a2%85-%ec%b6%9c%ec%8b%9c/",
+    "discount": {
+      "rate": 18,
+      "start_date": "2026-02-05",
+      "end_date": "2026-04-30",
+      "description": "크런키 콜라보 신메뉴 18% 할인"
+    }
   },
   {
     "id": 78,
@@ -61,7 +93,8 @@
     "title": "[빽다방X크런키] 크런키 음료 먹고 달콤한 선물을 잡아라! (2/5~3/15)",
     "date": "2026-02-05",
     "views": 10812,
-    "url": "https://paikdabang.com/post_news/crunky_event/"
+    "url": "https://paikdabang.com/post_news/crunky_event/",
+    "discount": null
   },
   {
     "id": 77,
@@ -69,7 +102,8 @@
     "title": "딸기 도파민 팡팡! 빽다방 딸기 신메뉴",
     "date": "2026-01-09",
     "views": 1488,
-    "url": "https://paikdabang.com/post_news/%eb%94%b8%ea%b8%b0-%eb%8f%84%ed%8c%8c%eb%af%bc-%ed%8c%a1%ed%8c%a1-%eb%b9%bd%eb%8b%a4%eb%b0%a9-%eb%94%b8%ea%b8%b0-%ec%8b%a0%eb%a9%94%eb%89%b4/"
+    "url": "https://paikdabang.com/post_news/%eb%94%b8%ea%b8%b0-%eb%8f%84%ed%8c%8c%eb%af%bc-%ed%8c%a1%ed%8c%a1-%eb%b9%bd%eb%8b%a4%eb%b0%a9-%eb%94%b8%ea%b8%b0-%ec%8b%a0%eb%a9%94%eb%89%b4/",
+    "discount": null
   },
   {
     "id": 76,
@@ -77,6 +111,12 @@
     "title": "2026년 말의해 맞이 ‘말차’ 전 메뉴 2,026원 프로모션(1/2~) – 빽다방 앱 ‘픽업오더 전용",
     "date": "2025-12-30",
     "views": 33874,
-    "url": "https://paikdabang.com/post_news/2026_promotion/"
+    "url": "https://paikdabang.com/post_news/2026_promotion/",
+    "discount": {
+      "rate": 25,
+      "start_date": "2026-01-02",
+      "end_date": "2026-02-28",
+      "description": "말차 관련 메뉴 25% 할인 (앱 픽업오더 전용)"
+    }
   }
 ]
