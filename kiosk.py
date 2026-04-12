@@ -1410,10 +1410,18 @@ def _execute_tool(fn_name: str, args: dict) -> str:
         # 반드시 온도 선택 질문을 먼저 하도록 r2에게 알린다.
         base = re.sub(r"\s*\((HOT|ICED)\)\s*$", "", name).strip()
         if base == name and base in get_both_temp_menus():
+            # HOT/ICED 각각의 가격을 메뉴 데이터에서 조회
+            menu_data = load_menu_data()
+            price_map = {m.get("menu_name", "").strip(): m.get("price_won") for m in menu_data}
+            hot_price  = price_map.get(f"{base}(HOT)")
+            iced_price = price_map.get(f"{base}(ICED)")
+            hot_str  = f"{hot_price:,}원"  if isinstance(hot_price,  int) else "가격정보없음"
+            iced_str = f"{iced_price:,}원" if isinstance(iced_price, int) else "가격정보없음"
             return (
                 f"온도_미지정: '{base}'은(는) HOT(따뜻한)과 ICED(차가운) 두 가지 옵션이 있습니다. "
-                f"장바구니에 담기 전에 고객에게 반드시 온도를 먼저 물어보세요. "
-                f"예시: '따뜻한 {base}(HOT)으로 드릴까요, 차가운 {base}(ICED)으로 드릴까요? ☕🧊'"
+                f"가격 정보: {base}(HOT) {hot_str} / {base}(ICED) {iced_str}. "
+                f"장바구니에 담기 전에 고객에게 반드시 온도와 가격을 함께 안내하고 선택을 물어보세요. "
+                f"예시: '{base}(HOT) {hot_str}, {base}(ICED) {iced_str} — 어떤 온도로 드릴까요? ☕🧊'"
             )
         # ────────────────────────────────────────────────────────────
         cart_add(name, price, qty)
