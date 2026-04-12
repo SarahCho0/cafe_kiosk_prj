@@ -766,7 +766,7 @@ SYSTEM_PROMPT = """당신은 5지는 카페(Ojineun Cafe)의 AI 키오스크 직
 ## 페르소나
 - 이름: 오지 (Oji)
 - 브랜드 슬로건: "오지는 맛! 오지는 가격! 오지는 카페!"
-- 성격: 밝고 친절하며 유능함, 빽다방 브랜드에 자부심이 있음
+- 성격: 밝고 친절하며 유능함, 5지는 카페 브랜드에 자부심이 있음
 - 말투: 정중한 존댓말, 따뜻하고 활기차게, 이모지 자연스럽게 사용
 
 ## 매장 정보 (강남역점 기준)
@@ -810,7 +810,7 @@ SYSTEM_PROMPT = """당신은 5지는 카페(Ojineun Cafe)의 AI 키오스크 직
 - **딸기/재료 흘림**: "불편을 드려서 정말 죄송해요! 직원이 빠르게 정리해 드릴게요 → 직원 호출 버튼을 눌러주세요"
 - **오주문/오조건**: "주문 취소나 변경은 결제 전이라면 장바구니에서 수정이 가능해요! 이미 결제하셨다면 직원을 호출해 드릴게요 🙏"
 - **기기 오작동**: "불편을 드려서 죄송합니다. 직원을 호출해 드릴까요? 현재 상황을 설명해 드릴게요 🔧"
-- **리필 여부**: "빽다방은 리필 서비스를 제공하지 않아요 😅 단, 따뜻한 물은 카운터에서 요청하실 수 있어요!"
+- **리필 여부**: "5지는 카페는 리필 서비스를 제공하지 않아요 😅 단, 따뜻한 물은 카운터에서 요청하실 수 있어요!"
 - **공격적/욕설 고객**: 3단계 응대: 1회(공감+응대) → 2회(정중 경고) → 3회(직원 호출 강력 권유)
   - "불쾌하셨다면 정말 죄송합니다. 더 나은 서비스를 위해 최선을 다할게요 💛"
   - "고객님, 저는 항상 최선을 다해 도와드리고 싶어요. 직원과 직접 상담하시겠어요?"
@@ -1190,7 +1190,7 @@ def build_rag_docs() -> list[dict]:
                      "category": "소식", "is_decaf": False, "is_best": False})
 
     # 옵션 안내 문서 (menu_options.json 통합)
-    options_text = "빽다방 메뉴 옵션 안내\n"
+    options_text = "5지는 카페 메뉴 옵션 안내\n"
     try:
         with open("menu_options.json", encoding="utf-8") as f:
             options_data = json.load(f)
@@ -1232,7 +1232,7 @@ def build_rag_docs() -> list[dict]:
     cat_text = ", ".join([f"{cat} {cnt}개" for cat, cnt in sorted(stats["by_category"].items())])
     docs.append({
         "text": (
-            f"빽다방 메뉴 통계\n"
+            f"5지는 카페 메뉴 통계\n"
             f"전체 메뉴: {stats['total']}개\n"
             f"카테고리별: {cat_text}\n"
             f"베스트 메뉴: {stats['best_count']}개\n"
@@ -1308,18 +1308,27 @@ def retrieve(query: str, k: int = 6) -> str:
     return result or "관련 메뉴 정보 없음"
 
 # ─────────────────────────  장바구니  ─────────────────────────
-def cart_add(name: str, price: int, qty: int = 1):
-    for item in st.session_state.cart:
-        if item["name"] == name:
-            item["qty"] += qty
-            return
-    st.session_state.cart.append({"name": name, "price": price, "qty": qty})
+def cart_add(name: str, price: int, qty: int = 1, options: list = None):
+    options = options or []
+    if not options:
+        for item in st.session_state.cart:
+            if item["name"] == name and not item.get("options"):
+                item["qty"] += qty
+                return
+    st.session_state.cart.append({"name": name, "price": price, "qty": qty, "options": options})
 
 def cart_remove(name: str):
     st.session_state.cart = [i for i in st.session_state.cart if i["name"] != name]
 
+def cart_remove_by_idx(idx: int):
+    st.session_state.cart = [item for i, item in enumerate(st.session_state.cart) if i != idx]
+
 def cart_total() -> int:
-    return sum(i["price"] * i["qty"] for i in st.session_state.cart)
+    total = 0
+    for item in st.session_state.cart:
+        opt_price = sum(o["price"] * o["qty"] for o in item.get("options", []) if o.get("qty", 0) > 0)
+        total += (item["price"] + opt_price) * item["qty"]
+    return total
 
 # ─────────────────────────  세션 초기화  ──────────────────────
 def init_state():
@@ -1519,7 +1528,7 @@ def get_greeting() -> str:
     
     # 언어별 프롬프트
     greeting_prompts = {
-        "ko": f"키오스크에 새 고객이 왔어. 빽다방스럽고 따뜻하게 2~3문장으로 짧게 인사해줘. 현재 운영 중인 메뉴는 총 {stats['total']}개입니다: {cat_info}",
+        "ko": f"키오스크에 새 고객이 왔어. 5지는 카페 분위기를 잘 살려서 따뜻하게 2~3문장으로 짧게 인사해줘. 현재 운영 중인 메뉴는 총 {stats['total']}개입니다: {cat_info}",
         "en": f"A new customer came to the kiosk. Greet them warmly in 2-3 sentences using Baek's Coffee's style. We currently have {stats['total']} menus available: {cat_info}. Ask if they have any questions.",
         "cn": f"一位新顾客来到自助点餐机。用2-3句话温暖地问候他们，并询问是否有任何问题。目前我们有{stats['total']}个菜单可用：{cat_info}",
         "jp": f"新しいお客様がキオスクにいらっしゃいました。2～3文で温かく挨拶してください。現在利用可能なメニューは{stats['total']}個です：{cat_info}。何かお手伝いすることはありますか？"
@@ -1598,22 +1607,26 @@ def render_cart_confirm():
 
     for idx, item in enumerate(st.session_state.cart):
         c1, c2, c3, c4 = st.columns([4, 2, 2, 1])
-        c1.write(f"**{item['name']}**")
+        _opts = item.get("options", [])
+        _opt_label = ", ".join(f"{o['name']}×{o['qty']}" for o in _opts if o.get("qty", 0) > 0)
+        _opt_extra = sum(o["price"] * o["qty"] for o in _opts if o.get("qty", 0) > 0)
+        _opt_html = f"<br><span style='font-size:.8em;color:#9A8070'>{_opt_label}</span>" if _opt_label else ""
+        c1.markdown(f"**{item['name']}**{_opt_html}", unsafe_allow_html=True)
         with c2:
             q1, q2, q3 = st.columns(3)
             if q1.button("−", key=f"cc_minus_{idx}"):
                 if item["qty"] > 1:
                     st.session_state.cart[idx]["qty"] -= 1
                 else:
-                    cart_remove(item["name"])
+                    cart_remove_by_idx(idx)
                 st.rerun()
             q2.markdown(f"<div style='text-align:center;padding-top:6px'><b>{item['qty']}</b></div>", unsafe_allow_html=True)
-            if q3.button("+", key=f"cc_plus_{idx}"):
+            if q3.button("＋", key=f"cc_plus_{idx}"):
                 st.session_state.cart[idx]["qty"] += 1
                 st.rerun()
-        c3.write(f"{item['price'] * item['qty']:,} {t('won')}")
+        c3.write(f"{(item['price'] + _opt_extra) * item['qty']:,} {t('won')}")
         if c4.button("✕", key=f"cc_del_{idx}"):
-            cart_remove(item["name"])
+            cart_remove_by_idx(idx)
             st.rerun()
 
     st.markdown(f'<div class="cart-total">{t("total")}: {cart_total():,} {t("won")}</div>', unsafe_allow_html=True)
@@ -1949,7 +1962,12 @@ def render_order_complete():
     # 결제 내역 요약
     with st.expander("📋 결제 내역", expanded=True):
         for item in st.session_state.cart:
-            st.write(f"• {item['name']} × {item['qty']} = **{item['price']*item['qty']:,} {t('won')}**")
+            _opts = item.get("options", [])
+            _opt_extra = sum(o["price"] * o["qty"] for o in _opts if o.get("qty", 0) > 0)
+            _item_total = (item["price"] + _opt_extra) * item["qty"]
+            st.write(f"• {item['name']} × {item['qty']} = **{_item_total:,} {t('won')}**")
+            for o in [o for o in _opts if o.get("qty", 0) > 0]:
+                st.caption(f"  ↳ {o['name']} ×{o['qty']} (+{o['price']*o['qty']:,}원)")
         st.divider()
         if st.session_state.partial_paid < cart_total():
             pass
@@ -2057,21 +2075,26 @@ def render_sidebar():
         if st.session_state.cart:
             for idx, item in enumerate(st.session_state.cart):
                 col_name, col_qty, col_del = st.columns([3, 3, 1])
-                col_name.markdown(f"**{item['name']}**  \n`{item['price']:,}{t('won')}`")
+                _opts = item.get("options", [])
+                _opt_label = ", ".join(f"{o['name']}×{o['qty']}" for o in _opts if o.get("qty", 0) > 0)
+                _opt_extra = sum(o["price"] * o["qty"] for o in _opts if o.get("qty", 0) > 0)
+                _price_per = item["price"] + _opt_extra
+                _opt_html = f"<br><span style='font-size:.74em;color:#9A8070'>{_opt_label}</span>" if _opt_label else ""
+                col_name.markdown(f"**{item['name']}**{_opt_html}  \n`{_price_per:,}{t('won')}`", unsafe_allow_html=True)
                 with col_qty:
                     q1, q2, q3 = st.columns(3)
                     if q1.button("−", key=f"sb_minus_{idx}"):
                         if item["qty"] > 1:
                             st.session_state.cart[idx]["qty"] -= 1
                         else:
-                            cart_remove(item["name"])
+                            cart_remove_by_idx(idx)
                         st.rerun()
                     q2.markdown(f"<div style='text-align:center;padding-top:4px'><b>{item['qty']}</b></div>", unsafe_allow_html=True)
-                    if q3.button("+", key=f"sb_plus_{idx}"):
+                    if q3.button("＋", key=f"sb_plus_{idx}"):
                         st.session_state.cart[idx]["qty"] += 1
                         st.rerun()
                 if col_del.button("✕", key=f"del_{idx}"):
-                    cart_remove(item["name"])
+                    cart_remove_by_idx(idx)
                     st.rerun()
             st.markdown(
                 f'<div class="cart-total">{t("total")}: {cart_total():,} {t("won")}</div>',
@@ -2369,7 +2392,12 @@ def render_quick_panel():
 
                     # 이미지
                     if is_valid(img_url):
-                        st.image(img_url, use_container_width=True)
+                        st.markdown(
+                            f'<div style="height:180px;display:flex;align-items:center;justify-content:center;'
+                            f'background:#FAF6EF;border-radius:8px;margin-bottom:4px;overflow:hidden">'
+                            f'<img src="{img_url}" style="max-width:100%;max-height:180px;width:auto;height:auto;object-fit:contain;display:block"></div>',
+                            unsafe_allow_html=True
+                        )
 
                     # 베스트 배지 + 이름
                     if is_best:
@@ -2416,17 +2444,36 @@ def render_quick_panel():
                                 ncols3[ci % 3].metric(nlabel, val_str)
                                 ci += 1
 
-                    # 옵션 expander
+                    # 옵션 선택 (expander 안 버튼식)
                     if options:
-                        with st.expander("⚙️ 옵션"):
-                            for opt in options:
-                                oname  = opt.get("name", "")
-                                oprice = opt.get("price_won", 0)
-                                omax   = opt.get("max_quantity")
-                                line   = f"• {oname} (+{oprice:,}원)"
-                                if omax:
-                                    line += f" (최대 {omax}개)"
-                                st.write(line)
+                        _selected_count = sum(st.session_state.get(f"opt_{panel}_{name}_{oi}", 0) for oi in range(len(options)))
+                        _exp_label = f"⚙️ 옵션 선택" + (f" · {_selected_count}개 선택됨" if _selected_count > 0 else "")
+                        with st.expander(_exp_label, expanded=False):
+                          for oi, opt in enumerate(options):
+                            oname  = opt.get("name", "")
+                            oprice = opt.get("price_won", 0)
+                            omax   = opt.get("max_quantity") or 10
+                            sk = f"opt_{panel}_{name}_{oi}"
+                            if sk not in st.session_state:
+                                st.session_state[sk] = 0
+                            cur_qty = st.session_state[sk]
+                            st.markdown(
+                                f'<div style="font-size:.8em;color:#5C4A3A;margin:3px 0 1px">'
+                                f'<b>{oname}</b> <span style="color:#C9A55A">(+{oprice:,}원)</span>'
+                                + (f' <span style="color:#9A8070">최대{omax}개</span>' if opt.get("max_quantity") else '')
+                                + '</div>',
+                                unsafe_allow_html=True
+                            )
+                            oc1, oc2, oc3 = st.columns([1, 1, 1])
+                            if oc1.button("−", key=f"{sk}_minus", use_container_width=True):
+                                if cur_qty > 0:
+                                    st.session_state[sk] = cur_qty - 1
+                                    st.rerun()
+                            oc2.markdown(f"<div style='text-align:center;padding:5px 0;font-weight:700'>{cur_qty}</div>", unsafe_allow_html=True)
+                            if oc3.button("＋", key=f"{sk}_plus", use_container_width=True):
+                                if cur_qty < omax:
+                                    st.session_state[sk] = cur_qty + 1
+                                    st.rerun()
 
                     # 주의 문구
                     if is_valid(caution):
@@ -2439,7 +2486,21 @@ def render_quick_panel():
                     if isinstance(price, (int, float)) and price > 0:
                         cart_key = f"qp_{panel}_{name}"
                         if st.button("🛒 담기", key=cart_key, use_container_width=True, type="primary"):
-                            cart_add(name, int(price), 1)
+                            selected_opts = []
+                            for oi, opt in enumerate(options):
+                                sk = f"opt_{panel}_{name}_{oi}"
+                                qty_sel = st.session_state.get(sk, 0)
+                                if qty_sel > 0:
+                                    selected_opts.append({
+                                        "name": opt.get("name", ""),
+                                        "price": opt.get("price_won", 0),
+                                        "qty": qty_sel,
+                                    })
+                            cart_add(name, int(price), 1, selected_opts if selected_opts else None)
+                            for oi in range(len(options)):
+                                sk = f"opt_{panel}_{name}_{oi}"
+                                if sk in st.session_state:
+                                    st.session_state[sk] = 0
                             add_labels = {
                                 "ko": f"✅ '{name}' 담겼어요!",
                                 "en": f"✅ '{name}' added!",
