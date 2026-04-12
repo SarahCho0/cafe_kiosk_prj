@@ -1590,27 +1590,26 @@ def get_greeting() -> str:
     stats = get_menu_stats()
     cat_info = ", ".join([f"{cat} {cnt}개" for cat, cnt in sorted(stats["by_category"].items())])
     
-    # 언어별 프롬프트
-    greeting_prompts = {
-        "ko": f"키오스크에 새 고객이 왔어. 5지는 카페 분위기를 잘 살려서 따뜻하게 2~3문장으로 짧게 인사해줘. 현재 운영 중인 메뉴는 총 {stats['total']}개입니다: {cat_info}",
-        "en": f"A new customer came to the kiosk. Greet them warmly in 2-3 sentences using Baek's Coffee's style. We currently have {stats['total']} menus available: {cat_info}. Ask if they have any questions.",
-        "cn": f"一位新顾客来到自助点餐机。用2-3句话温暖地问候他们，并询问是否有任何问题。目前我们有{stats['total']}个菜单可用：{cat_info}",
-        "jp": f"新しいお客様がキオスクにいらっしゃいました。2～3文で温かく挨拶してください。現在利用可能なメニューは{stats['total']}個です：{cat_info}。何かお手伝いすることはありますか？"
-    }
+    # 2. 한국어 단일 프롬프트 사용
+    greeting_prompt_ko = f"키오스크에 새 고객이 왔어. 5지는 카페 분위기를 잘 살려서 따뜻하게 2~3문장으로 짧게 인사해줘. 현재 운영 중인 메뉴는 총 {stats['total']}개입니다: {cat_info}"
     
     try:
         r = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": get_system_prompt(lang)},
-                {"role": "user", "content": greeting_prompts.get(lang, greeting_prompts["ko"])},
+                {"role": "system", "content": SYSTEM_PROMPT}, # 시스템도 한국어
+                {"role": "user", "content": greeting_prompt_ko}, # 유저 프롬프트도 한국어
             ],
             temperature=0, max_tokens=120,
         )
-        return r.choices[0].message.content
+        
+        # 3. 답변을 받은 후 타겟 언어로 번역해서 반환
+        greeting_ko = r.choices[0].message.content
+        return translate_to_target(greeting_ko, lang)
+        
     except Exception:
         return greeting_fallback.get(lang, greeting_fallback["ko"])
-
+    
 # ─────────────────────────  결제 플로우  ─────────────────────
 PAYMENT_STEPS = [
     ("cart_confirm",    "stage_cart"),
@@ -2126,9 +2125,8 @@ def render_sidebar():
             if lang_cols[i % 2].button(label, key=f"lang_{code}", use_container_width=True, type=btn_type):
                 if st.session_state.get("lang") != code:
                     st.session_state.lang = code
-                    # 언어 변경 시 채팅 기록 초기화 + 새 시스템 프롬프트 적용
-                    new_system = get_system_prompt(code)
-                    st.session_state.api_messages = [{"role": "system", "content": new_system}]
+                    # 시스템 프롬프트는 항상 한국어(SYSTEM_PROMPT)로 고정!
+                    st.session_state.api_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
                     st.session_state.display_msgs = []
                     st.session_state.greeted = False
                     st.rerun()
