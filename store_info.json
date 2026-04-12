@@ -1,8 +1,8 @@
 {
   "store": {
-    "store_id": "PB_GANGNAM_001",
-    "brand": "빽다방",
-    "store_name": "빽다방 강남역점",
+    "store_id": "OJI_GANGNAM_001",
+    "brand": "5지는 카페",
+    "store_name": "5지는 카페 강남역점",
     "address": "서울시 강남구 강남대로 100 강남빌딩 1층",
     "latitude": 37.4979,
     "longitude": 127.0276,
@@ -19,7 +19,14 @@
         "total_seats": 45,
         "inside_seats": 30,
         "outside_seats": 15,
-        "seats_description": "1층 카운터 3석, 안쪽 테이블 27석, 야외 테라스 15석"
+        "seats_description": "1층 카운터 3석, 안쪽 테이블 27석, 야외 테라스 15석",
+        "group_seating": {
+          "available": true,
+          "max_group_size": 10,
+          "description": "단체석 예약 가능 (최대 10명)",
+          "reservation_required": true,
+          "contact": "02-6955-0123"
+        }
       },
       "restroom": {
         "location": "매장 안쪽 우측",
@@ -45,6 +52,12 @@
         "available": true,
         "count": 8,
         "location": "테이블 옆 벽면, 카운터 근처"
+      },
+      "pet_friendly": {
+        "available": true,
+        "description": "반려동물 동반 가능 (실내/야외 테라스 모두 가능)",
+        "restrictions": "대형견 제외, 이동장 사용 권장",
+        "water_available": true
       }
     },
     "payment_methods": [
