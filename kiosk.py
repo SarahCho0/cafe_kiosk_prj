@@ -1390,8 +1390,43 @@ def _execute_tool(fn_name: str, args: dict) -> str:
         return f"결제화면으로 이동합니다. 총액={cart_total():,}원"
     return "처리완료"
 
+def translate_to_ko(text: str, current_lang: str) -> str:
+    """[번역 1단계] 사용자 입력을 한국어로 번역 (RAG 검색용)"""
+    if current_lang == "ko":
+        return text
+    client = get_client()
+    try:
+        r = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a translator. Translate the following text to Korean accurately. Output ONLY the Korean text without any quotes or explanations."},
+                {"role": "user", "content": text}
+            ], temperature=0
+        )
+        return r.choices[0].message.content.strip()
+    except:
+        return text
+
+def translate_to_target(text: str, target_lang: str) -> str:
+    """[번역 2단계] 오지의 한국어 답변을 사용자의 언어로 번역"""
+    if target_lang == "ko":
+        return text
+    lang_map = {"en": "English", "cn": "Simplified Chinese", "jp": "Japanese"}
+    client = get_client()
+    try:
+        r = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": f"You are a polite cafe staff. Translate the following Korean text to {lang_map.get(target_lang, target_lang)}. Preserve all emojis, formatting, and the [[STAFF_CALL]] tag if it exists. Output ONLY the translation."},
+                {"role": "user", "content": text}
+            ], temperature=0
+        )
+        return r.choices[0].message.content.strip()
+    except:
+        return text
+
 def chat(user_input: str) -> tuple[str, bool]:
-    """채팅 응답 반환. (응답 텍스트, staff_call_needed 여부)"""
+    """채팅 응답 반환. (번역 레이어 패턴 적용)"""
     client = get_client()
     if not client:
         lang = st.session_state.get("lang", "ko")
@@ -1402,29 +1437,33 @@ def chat(user_input: str) -> tuple[str, bool]:
             "jp": "⚠️ 設定画面でOpenAI APIキーを入力してください。",
         }
         return warn.get(lang, warn["ko"]), False
+    
+    lang = st.session_state.get("lang", "ko")
 
-    # ── 욕설/진상/돌발 키워드 감지 ──
+    # ── 1. 번역 파이프라인 (In): 무조건 한국어로 변환 ──
+    query_ko = translate_to_ko(user_input, lang)
+
+    # ── 2. 욕설/진상 감지 (한국어로 번역된 텍스트 기준 검사!) ──
     abuse_keywords = [
         "빨리", "짜증", "미쳤", "바보", "쓸모없", "환불", "바가지", "야 ",
-        "꺼져", "죽어", "씨발", "개같", "병신", "멍청", "느려 터진", "뭐가 이렇게",
+        "꺼져", "죽어", "씨발", "개같", "병신", "멍청", "느려 터진", "뭐가 이렇게"
     ]
     incident_keywords = [
         "흘렸", "엎었", "쏟았", "쏟았어", "쏟아졌", "아기", "울어", "소음",
         "시끄럽", "내쫒", "쫓아내", "노숙자", "회장님", "방송", "촬영", "VIP",
         "오주문", "오작동", "직원 불러", "직원 좀", "알바 불러", "매니저",
-        "얼음 추가", "리필", "휴지 어딨", "화장실 어딨",
-        "딸기 흘", "음료 흘",
+        "얼음 추가", "리필", "휴지 어딨", "화장실 어딨", "딸기 흘", "음료 흘"
     ]
-    is_abuse = any(kw in user_input for kw in abuse_keywords)
-    is_incident = any(kw in user_input for kw in incident_keywords)
+    is_abuse = any(kw in query_ko for kw in abuse_keywords)
+    is_incident = any(kw in query_ko for kw in incident_keywords)
     if is_abuse:
         st.session_state.abuse_count += 1
 
-    # ── RAG 검색 ──
-    rag_ctx = retrieve(user_input)
-    augmented = f"[메뉴 정보]\n{rag_ctx}\n\n[고객 질문]\n{user_input}"
+    # ── 3. RAG 검색 (한국어 검색으로 100% 적중) ──
+    rag_ctx = retrieve(query_ko)
+    augmented = f"[메뉴 정보]\n{rag_ctx}\n\n[고객 질문]\n{query_ko}"
 
-    # ── 1차 API 호출 (with tools) ──
+    # ── 4. Main API 호출 (오지의 두뇌는 한국어로 작동) ──
     messages_for_api = st.session_state.api_messages.copy()
     messages_for_api.append({"role": "user", "content": augmented})
 
@@ -1442,15 +1481,21 @@ def chat(user_input: str) -> tuple[str, bool]:
 
     msg1 = r1.choices[0].message
 
-    # ── 도구 호출 없으면 바로 반환 ──
+    # 도구 호출이 없는 일반 대화인 경우
     if not msg1.tool_calls:
-        reply = msg1.content or "죄송해요, 다시 말씀해 주시겠어요? 😊"
-        _update_history(user_input, reply)
-        staff_call = "[[STAFF_CALL]]" in reply or (is_abuse and st.session_state.abuse_count >= 3) or is_incident
-        reply_clean = reply.replace("[[STAFF_CALL]]", "").strip()
+        reply_ko = msg1.content or "죄송해요, 다시 말씀해 주시겠어요? 😊"
+        
+        # ── 5. 번역 파이프라인 (Out) ──
+        final_reply = translate_to_target(reply_ko, lang)
+        
+        # LLM 두뇌(api_messages)에는 한국어만 기록!
+        _update_history(query_ko, reply_ko)
+        
+        staff_call = "[[STAFF_CALL]]" in final_reply or (is_abuse and st.session_state.abuse_count >= 3) or is_incident
+        reply_clean = final_reply.replace("[[STAFF_CALL]]", "").strip()
         return reply_clean, staff_call
 
-    # ── 도구 호출 처리 ──
+    # 도구 호출 처리
     asst_dict = {
         "role": "assistant",
         "content": msg1.content,
@@ -1479,7 +1524,7 @@ def chat(user_input: str) -> tuple[str, bool]:
         })
     messages_for_api.extend(tool_results)
 
-    # ── 2차 API 호출 (최종 자연어 응답) ──
+    # 도구 실행 후 최종 자연어 응답 (한국어)
     try:
         r2 = get_client().chat.completions.create(
             model="gpt-4o-mini",
@@ -1487,13 +1532,18 @@ def chat(user_input: str) -> tuple[str, bool]:
             temperature=0,
             max_tokens=500,
         )
-        reply = r2.choices[0].message.content or "\n".join(m["content"] for m in tool_results)
+        reply_ko = r2.choices[0].message.content or "\n".join(m["content"] for m in tool_results)
     except Exception:
-        reply = "\n".join(m["content"] for m in tool_results)
+        reply_ko = "\n".join(m["content"] for m in tool_results)
 
-    _update_history(user_input, reply)
-    staff_call = "[[STAFF_CALL]]" in reply or (is_abuse and st.session_state.abuse_count >= 3)
-    reply_clean = reply.replace("[[STAFF_CALL]]", "").strip()
+    # ── 5. 번역 파이프라인 (Out) ──
+    final_reply = translate_to_target(reply_ko, lang)
+
+    # 히스토리 업데이트 (LLM은 한국어로만 대화 기억)
+    _update_history(query_ko, reply_ko)
+
+    staff_call = "[[STAFF_CALL]]" in final_reply or (is_abuse and st.session_state.abuse_count >= 3)
+    reply_clean = final_reply.replace("[[STAFF_CALL]]", "").strip()
     return reply_clean, staff_call
 
 def _update_history(user_input: str, reply: str):
