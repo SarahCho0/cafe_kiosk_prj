@@ -829,6 +829,7 @@ SYSTEM_PROMPT = """당신은 5지는 카페(Ojineun Cafe)의 AI 키오스크 직
 7. 절대 감정적으로 반응하지 마세요. 돌발 상황에서도 침착·정중하게.
 8. 직원 호출이 필요한 상황은 반드시 응답 끝에 [[STAFF_CALL]] 포함.
 9. 응답은 간결하고 명확하게, 필요한 경우 리스트/표로 정리하세요.
+10. **HOT/ICED 반드시 확인 후 주문**: 고객이 메뉴명만 말하고 온도(HOT/ICED)를 명시하지 않았을 때, 해당 메뉴에 두 가지 온도 옵션이 모두 있다면 add_to_cart를 절대 호출하지 마세요. 반드시 RAG에서 HOT/ICED 각각의 가격을 확인한 뒤 가격과 함께 안내하세요. 예시: "[메뉴명](HOT) X,XXX원, [메뉴명](ICED) X,XXX원 — 어떤 온도로 드릴까요? ☕🧊"
 """
 
 # ─────────────────────────  언어별 SYSTEM PROMPT  ───────────────
@@ -872,7 +873,8 @@ SYSTEM_PROMPTS = {
 1. Answer based ONLY on RAG data. Display exact prices with menu names.
 2. For unknown info: "I'm sorry, I couldn't find that information 😅"
 3. Always remain polite and calm, never emotional.
-4. Keep responses concise and clear.""",
+4. Keep responses concise and clear.
+5. **HOT/ICED confirmation required**: If a customer orders a menu item without specifying HOT or ICED, and both options exist, do NOT call add_to_cart. Look up both prices from RAG and show them. Example: "[menu](HOT) X,XXX KRW / [menu](ICED) X,XXX KRW — Which temperature would you like? ☕🧊""",
     "중": """你是Oji，5지는 카페(Ojineun Cafe)的AI自助点餐机店员。
 5. Complex Queries & Comparisons: If the user asks multiple questions or wants to compare menus, answer all parts clearly, using lists or tables for comparison (e.g., price, calories).
 
@@ -901,7 +903,8 @@ SYSTEM_PROMPTS = {
 ## 响应原则
 1. 仅基于RAG数据回答，始终显示确切价格
 2. 未知信息: "抱歉，找不到该信息 😅"
-3. 保持礼貌、冷静，从不情绪化""",
+3. 保持礼貌、冷静，从不情绪化
+4. **确认冷热再点餐**: 顾客点餐时若未说明冷热，且该菜单同时有HOT和ICED选项，请勿直接调用add_to_cart，必须先查RAG确认两者价格后告知顾客。示例: "[菜单](HOT) X,XXX韩币 / [菜单](ICED) X,XXX韩币 — 您要哪种温度呢？ ☕🧊""",
     "일": """あなたはOji、5지는 카페(Ojineun Cafe)のAIキオスク店員です。
 4. 复合查询与比较: 如果用户提出多个问题或要求比较菜单，请清晰地回答所有问题，并在比较时使用列表或表格（如价格、卡路里等）。
 
@@ -931,7 +934,8 @@ SYSTEM_PROMPTS = {
 1. RAGデータのみ。正確な価格を常に表示。
 2. 不明情報: "申し訳ございませんが、その情報は見つかりませんでした 😅"
 3. 常に礼儀正しく。決して感情的にならないこと。
-4. 複合質問とメニュー比較: ユーザーが複数の質問をしたり、メニューの比較を求めた場合は、すべての質問に明確に答え、比較にはリストや表（価格、カロリーなど）を使用してください。"""
+4. 複合質問とメニュー比較: ユーザーが複数の質問をしたり、メニューの比較を求めた場合は、すべての質問に明確に答え、比較にはリストや表（価格、カロリーなど）を使用してください。
+5. **HOT/ICEDの確認必須**: お客様がメニュー名のみ言ってHOT/ICEDを指定しなかった場合、両方のオプションがあればadd_to_cartを絶対に呼び出さず、必ずRAGで両方の価格を確認してからお客様にお伝えください。例: "[メニュー](HOT) X,XXX円 / [メニュー](ICED) X,XXX円 — どちらの温度になさいますか？ ☕🧊"""
 }
 
 def get_system_prompt(language: str) -> str:
@@ -1082,6 +1086,18 @@ def load_news_data():
             return json.load(f)
     except FileNotFoundError:
         return []
+
+@st.cache_data
+def get_both_temp_menus() -> frozenset:
+    """HOT과 ICED 두 가지가 모두 있는 메뉴의 기본 이름 집합 (예: '아메리카노', '카페라떼')"""
+    menu = load_menu_data()
+    names = {m.get("menu_name", "").strip() for m in menu}
+    result = set()
+    for name in names:
+        base = re.sub(r"\s*\((HOT|ICED)\)\s*$", "", name).strip()
+        if base != name and f"{base}(HOT)" in names and f"{base}(ICED)" in names:
+            result.add(base)
+    return frozenset(result)
 
 @st.cache_data
 def load_store_info():
@@ -1386,9 +1402,28 @@ def get_client():
 def _execute_tool(fn_name: str, args: dict) -> str:
     """도구 실행 후 결과 문자열 반환"""
     if fn_name == "add_to_cart":
-        name  = args.get("menu_name", "")
+        name  = args.get("menu_name", "").strip()
         price = args.get("price_won", 0)
         qty   = args.get("quantity", 1)
+        # ── HOT/ICED 미지정 안전망 ──────────────────────────────────
+        # LLM이 "(HOT)"/"(ICED)" 없이 add_to_cart를 호출하면 가로채서,
+        # 반드시 온도 선택 질문을 먼저 하도록 r2에게 알린다.
+        base = re.sub(r"\s*\((HOT|ICED)\)\s*$", "", name).strip()
+        if base == name and base in get_both_temp_menus():
+            # HOT/ICED 각각의 가격을 메뉴 데이터에서 조회
+            menu_data = load_menu_data()
+            price_map = {m.get("menu_name", "").strip(): m.get("price_won") for m in menu_data}
+            hot_price  = price_map.get(f"{base}(HOT)")
+            iced_price = price_map.get(f"{base}(ICED)")
+            hot_str  = f"{hot_price:,}원"  if isinstance(hot_price,  int) else "가격정보없음"
+            iced_str = f"{iced_price:,}원" if isinstance(iced_price, int) else "가격정보없음"
+            return (
+                f"온도_미지정: '{base}'은(는) HOT(따뜻한)과 ICED(차가운) 두 가지 옵션이 있습니다. "
+                f"가격 정보: {base}(HOT) {hot_str} / {base}(ICED) {iced_str}. "
+                f"장바구니에 담기 전에 고객에게 반드시 온도와 가격을 함께 안내하고 선택을 물어보세요. "
+                f"예시: '{base}(HOT) {hot_str}, {base}(ICED) {iced_str} — 어떤 온도로 드릴까요? ☕🧊'"
+            )
+        # ────────────────────────────────────────────────────────────
         cart_add(name, price, qty)
         return f"장바구니_추가: {name} {qty}개 ({price:,}원)"
     elif fn_name == "remove_from_cart":
