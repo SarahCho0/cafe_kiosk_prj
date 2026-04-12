@@ -1303,6 +1303,20 @@ def retrieve(query: str, k: int = 6) -> str:
         return "\n\n---\n\n".join(h["text"] for h in hits) or "관련 메뉴 정보 없음"
     q_vec = vectorizer.transform([query])
     sims = cosine_similarity(q_vec, matrix).flatten()
+
+    # ── 메뉴명 직접 매칭 보정 ─────────────────────────────────────
+    # TF-IDF IDF 역설: "아메리카노" n-gram이 전체 문서에 많이 등장하면
+    # IDF가 낮아져 기본 아메리카노 문서가 파생 메뉴보다 낮은 순위가 됨.
+    # HOT/ICED suffix 제거 후 쿼리와 정확히 일치하거나, 쿼리 안에 메뉴명이
+    # 포함된 경우 최상위로 고정.
+    for i, doc in enumerate(docs):
+        clean = re.sub(r"\s*\((HOT|ICED)\)\s*$", "", doc.get("name", "")).strip()
+        if (clean == query                          # 쿼리 = 메뉴명 (e.g. "아메리카노")
+                or doc.get("name", "") == query     # 쿼리 = 풀네임 (e.g. "아메리카노(HOT)")
+                or (clean and clean in query)):     # 쿼리 안에 메뉴명 포함 (e.g. "아메리카노 가격이요?")
+            sims[i] = max(sims[i], 0.99)
+    # ──────────────────────────────────────────────────────────────
+
     top_idx = sims.argsort()[-k:][::-1]
     result = "\n\n---\n\n".join(docs[i]["text"] for i in top_idx if sims[i] > 0.005)
     return result or "관련 메뉴 정보 없음"
