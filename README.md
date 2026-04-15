@@ -1,74 +1,141 @@
+<div align="center">
+
+<br/>
+
 # ☕ 5지는 카페 키오스크
 
-빽다방 메뉴 데이터 기반의 Streamlit 메뉴 뷰어 및 AI 주문 키오스크 프로젝트입니다.
+**AI-powered cafe kiosk · Natural language ordering in 4 languages**
+
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![OpenAI](https://img.shields.io/badge/GPT--4o--mini-412991?style=flat-square&logo=openai&logoColor=white)](https://openai.com)
+[![scikit-learn](https://img.shields.io/badge/TF--IDF_RAG-F7931E?style=flat-square&logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
+
+<br/>
+
+[![📋 Kiosk Features](https://img.shields.io/badge/📋_Kiosk-Features_%26_Spec-6F4E37?style=for-the-badge)](kiosk.md)
+[![🗄️ Data & RAG](https://img.shields.io/badge/🗄️_Data-Parsing_%26_RAG-4A86C8?style=for-the-badge)](parsing.md)
+
+<br/>
+
+</div>
 
 ---
 
-## 파일 구조
+## Overview
 
-```
-cafe_kiosk/
-├── kiosk.py                     # AI 키오스크 — 오지(Oji)  ← 메인 앱
-├── app.py                       # 커피 메뉴 뷰어
-├── app2.py                      # 전체 메뉴 뷰어
-├── parse_paikdabang_coffee.py   # 메뉴 HTML 파싱 스크립트
-├── parse_price_and_news.py      # 가격·뉴스 파싱 스크립트
-├── requirements.txt             # 의존성 목록
-├── paikdabang_menu_rev.json     # 전체 메뉴 + 가격 (kiosk.py, app2.py)
-├── paikdabang_menu_dom.json     # 메뉴 DOM 원본 (파싱 중간 결과물)
-├── paikdabang_coffee_menu.json  # 커피 메뉴 (app.py)
-├── paikdabang_news.json         # 소식·이벤트
-├── menu_options.json            # 추가 옵션 (추가샷/시럽 등)
-├── store_info.json              # 매장 정보
-├── Paik's_news.html             # 뉴스 HTML 원본 (파싱용)
-├── kiosk.md                     # AI 키오스크 기능 명세 →
-└── parsing.md                   # 데이터 파싱·RAG 구조 →
-```
+**5지는 카페 키오스크** is a Streamlit-based AI ordering system built on **Paik's Coffee (빽다방)** menu data.
+The GPT-4o-mini powered chatbot **Oji (오지)** takes natural language orders, manages a cart, and guides checkout — all in **Korean, English, Chinese, and Japanese**.
+
+| | `kiosk.py` | `app2.py` | `app.py` |
+|---|---|---|---|
+| **Role** | AI kiosk · main app | Full menu browser | Coffee viewer |
+| **AI Chat** | ✅ GPT-4o-mini + TF-IDF RAG | — | — |
+| **Cart & Checkout** | ✅ 7-step flow with options | — | — |
+| **Languages** | 🇰🇷 🇺🇸 🇨🇳 🇯🇵 | — | — |
+| **Menu Count** | 332 items | 332 items | Coffee only |
 
 ---
 
-## 설치
+## Quick Start
+
+**1 · Install dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-`kiosk.py`는 OpenAI API 키가 필요합니다. 환경 변수로 설정하거나 앱 사이드바에서 직접 입력할 수 있습니다.
+**2 · Set your OpenAI API key**
 
 ```bash
 export OPENAI_API_KEY="sk-..."
 ```
 
----
+> Or enter it directly in the app sidebar.
 
-## 실행
+**3 · Run**
 
 ```bash
-streamlit run kiosk.py      # AI 키오스크 (오지)
+streamlit run kiosk.py      # ← AI kiosk (recommended)
+streamlit run app2.py       # Full menu browser
+streamlit run app.py        # Coffee menu viewer
+```
+
+---
+
+## Project Structure
+
+```
+cafe_kiosk/
+├── kiosk.py                     # AI kiosk — Oji  ← main app
+├── app2.py                      # Full menu viewer
+├── app.py                       # Coffee menu viewer
+├── parse_paikdabang_coffee.py   # Menu HTML parser
+├── parse_price_and_news.py      # Price & news parser
+├── requirements.txt
+├── paikdabang_menu_rev.json     # Full menu + prices  ← kiosk.py & app2.py
+├── paikdabang_menu_dom.json     # Raw parsed menu DOM
+├── paikdabang_coffee_menu.json  # Coffee-only menu    ← app.py
+├── paikdabang_news.json         # Events & news
+├── menu_options.json            # Add-on options (shots, syrups…)
+├── store_info.json              # Store details
+├── kiosk.md                     # ↗ Kiosk feature spec
+└── parsing.md                   # ↗ Data & RAG structure
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| UI | Streamlit |
+| AI | OpenAI GPT-4o-mini |
+| Retrieval (RAG) | scikit-learn · TF-IDF char n-gram (2–4) · cosine similarity |
+| Parsing | BeautifulSoup4 |
+| Data | JSON files — no database |
+
+---
+
+## Refresh Menu Data
+
+```bash
+python parse_paikdabang_coffee.py   # Re-parse menu HTML  → paikdabang_menu_dom.json
+python parse_price_and_news.py      # Update prices & news → paikdabang_menu_rev.json
+```
+
+---
+
+<details>
+<summary>🇰🇷 &nbsp;한국어 설명 보기</summary>
+<br/>
+
+## 개요
+
+**5지는 카페 키오스크**는 빽다방 메뉴 데이터 기반의 Streamlit AI 주문 시스템입니다.
+GPT-4o-mini 챗봇 **오지(Oji)**가 자연어로 주문을 받고, 장바구니 관리와 결제 안내를 진행합니다.
+**한국어 · 영어 · 중국어 · 일본어** 4개 언어를 지원합니다.
+
+## 빠른 시작
+
+```bash
+# 의존성 설치
+pip install -r requirements.txt
+
+# OpenAI API 키 설정
+export OPENAI_API_KEY="sk-..."
+
+# 실행
+streamlit run kiosk.py      # AI 키오스크 (오지) ← 메인 앱
 streamlit run app2.py       # 전체 메뉴 뷰어
 streamlit run app.py        # 커피 메뉴 뷰어
 ```
 
----
-
-## 앱 구성
-
-|  | `kiosk.py` | `app2.py` | `app.py` |
-|---|---|---|---|
-| **목적** | AI 자연어 주문 | 전체 메뉴 조회 | 커피 메뉴 조회 |
-| **AI 챗봇** | ✅ GPT-4o-mini + TF-IDF RAG | ❌ | ❌ |
-| **장바구니·결제** | ✅ 옵션 포함, 7단계 결제 | ❌ | ❌ |
-| **다국어** | ✅ 한·영·중·일 | ❌ | ❌ |
-| **메뉴 수** | 332개 | 332개 | 커피만 |
-
-> 기능 상세 스펙 → [kiosk.md](kiosk.md)
-> 데이터 파싱·RAG 구조 → [parsing.md](parsing.md)
-
----
-
 ## 데이터 갱신
 
 ```bash
-python parse_paikdabang_coffee.py    # 메뉴 HTML 재파싱 → paikdabang_menu_dom.json
-python parse_price_and_news.py       # 가격·뉴스 갱신 → paikdabang_menu_rev.json
+python parse_paikdabang_coffee.py   # 메뉴 HTML 재파싱 → paikdabang_menu_dom.json
+python parse_price_and_news.py      # 가격·뉴스 갱신   → paikdabang_menu_rev.json
 ```
+
+</details>
